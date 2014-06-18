@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"time"
+	"io"
 )
 
 type AuthReq struct {
@@ -95,6 +96,9 @@ func main() {
 		default:
 			var msg []RawLog
 			err = websocket.JSON.Receive(ws, &msg)
+			if err == io.EOF {
+				os.Exit(0)
+			}
 			if err != nil {
 				panic(err)
 			}
