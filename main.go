@@ -1,11 +1,12 @@
 package main
 
 import (
-	"code.google.com/p/go.net/websocket"
 	"fmt"
 	//	"reflect"
 	"encoding/json"
 	//"log"
+	"code.google.com/p/go.net/websocket"
+	"github.com/codegangsta/cli"
 	"os"
 	"os/signal"
 	"time"
@@ -48,7 +49,7 @@ func (self *RawLog) Log() *Log {
 	}
 }
 
-func main() {
+func StartLogging() {
 	req := &AuthReq{
 		os.ExpandEnv("${KII_APP_ID}"),
 		os.ExpandEnv("${KII_APP_KEY}"),
@@ -106,4 +107,20 @@ func main() {
 			//log.Printf("wrote %d", len(msg))
 		}
 	}
+}
+
+func main() {
+	app := cli.NewApp()
+	app.Name = "kii-armyknife"
+	app.Usage = "KiiCloud command line tools"
+	app.Commands = []cli.Command{
+		{
+			Name:  "log",
+			Usage: "print logs",
+			Action: func(c *cli.Context) {
+				StartLogging()
+			},
+		},
+	}
+	app.Run(os.Args)
 }
