@@ -23,6 +23,13 @@ func main() {
 				StartLogging()
 			},
 		},
+		{
+			Name:  "server",
+			Usage: "WebSocket echo server for testing",
+			Action: func(c *cli.Context) {
+				StartWSEchoServer()
+			},
+		},
 	}
 	app.Run(os.Args)
 }
