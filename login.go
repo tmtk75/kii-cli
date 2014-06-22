@@ -77,25 +77,28 @@ func retrieveAppAdminAccessToken() *OAuth2Response {
 	return oauth2res.Decode(res)
 }
 
-func LoginAsAppAdmin() error {
-	res := retrieveAppAdminAccessToken()
-	res.Save(tokenFilePath())
-	return nil
-}
-
 func tokenFilePath() string {
 	return metaFilePath(fmt.Sprintf("%s.token", globalConfig.AppId))
+}
+
+func LoginAsAppAdmin(force bool) {
+	if b, _ := exists(tokenFilePath()); b && !force {
+		fmt.Fprintf(os.Stderr, "Already logged in, use `--force` to login\n")
+		os.Exit(0)
+	}
+	res := retrieveAppAdminAccessToken()
+	res.Save(tokenFilePath())
 }
 
 var LoginCommands = []cli.Command{
 	{
 		Name:  "login",
 		Usage: "Login as AppAdmin",
+		Flags: []cli.Flag{
+			cli.BoolFlag{"force", "Force to login"},
+		},
 		Action: func(c *cli.Context) {
-			err := LoginAsAppAdmin()
-			if err != nil {
-				panic(err)
-			}
+			LoginAsAppAdmin(c.Bool("force"))
 		},
 	},
 	{
