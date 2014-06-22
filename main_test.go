@@ -7,12 +7,13 @@ import (
 )
 
 func Flatten(a [][]cli.Command) []cli.Command {
-	i := int(0)
+	b := []cli.Command{}
 	for _, v := range a {
-		i += len(v)
+		for _, i := range v {
+			b = append(b, i)
+		}
 	}
-	b := [4]cli.Command{}
-	return &b
+	return b
 }
 
 func TestFlatten(t *testing.T) {
@@ -28,7 +29,7 @@ func TestFlatten(t *testing.T) {
 
 	actual := Flatten(a)
 
-	if len(actual) == 4 {
+	if len(actual) != 4 {
 		t.Errorf("len is not 4: %d", len(actual))
 	}
 	if actual[0].Name != "add" {
