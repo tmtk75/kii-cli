@@ -38,14 +38,14 @@ func (self *OAuth2Response) Bytes() []byte {
 }
 
 func (self *OAuth2Response) Save(filename string) {
-	err := ioutil.WriteFile(filename, self.Bytes(), 0755)
+	err := ioutil.WriteFile(filename, self.Bytes(), 0644)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func (self *OAuth2Response) Load() *OAuth2Response {
-	self.LoadFrom(metaFilePath(".token"))
+	self.LoadFrom(tokenFilePath())
 	return self
 }
 
@@ -79,8 +79,12 @@ func retrieveAppAdminAccessToken() *OAuth2Response {
 
 func LoginAsAppAdmin() error {
 	res := retrieveAppAdminAccessToken()
-	res.Save(metaFilePath(".token"))
+	res.Save(tokenFilePath())
 	return nil
+}
+
+func tokenFilePath() string {
+	return metaFilePath(fmt.Sprintf("%s.token", globalConfig.AppId))
 }
 
 var LoginCommands = []cli.Command{
