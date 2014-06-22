@@ -112,7 +112,7 @@ func setupFlags(app *cli.App) {
 		cli.StringFlag{"app-key", "", "AppKey"},
 		cli.StringFlag{"client-id", "", "ClientID"},
 		cli.StringFlag{"client-secret", "", "ClientSecret"},
-		cli.StringFlag{"site", "us", "us,jp,cn,sg"},
+		cli.StringFlag{"site", "", "us,jp,cn,sg"},
 		cli.BoolFlag{"verbose", "Verbosely"},
 		cli.StringFlag{"profile", "default", "Profile name for ~/.kii/config"},
 	}
