@@ -34,14 +34,32 @@ type Log struct {
 	Time        time.Time
 }
 
-func StartLogging() {
-	req := &AuthReq{
-		os.ExpandEnv("${KII_APP_ID}"),
-		os.ExpandEnv("${KII_APP_KEY}"),
-		os.ExpandEnv("${KII_CLIENT_ID}"),
-		os.ExpandEnv("${KII_CLIENT_SECRET}"),
+type AuthRequest struct {
+	AppID        string `json:"appID"`
+	AppKey       string `json:"appKey"`
+	ClientID     string `json:"clientID"`
+	ClientSecret string `json:"clientSecret"`
+	//	Token        string
+	Command string `json:"command"` // 'tail' or 'cat'
+	//	UserID       string
+	//	Level        string
+	//	DateFrom     string
+	//	DateTo       string
+}
+
+func (self *GlobalConfig) AuthRequest() *AuthRequest {
+	req := &AuthRequest{
+		self.AppId,
+		self.AppKey,
+		self.ClientId,
+		self.ClientSecret,
 		"tail",
 	}
+	return req
+}
+
+func StartLogging() {
+	req := globalConfig.AuthRequest()
 	j, err := json.Marshal(req)
 	if err != nil {
 		panic(err)
