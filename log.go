@@ -8,6 +8,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/codegangsta/cli"
+
 	"code.google.com/p/go.net/websocket"
 )
 
@@ -110,4 +112,14 @@ func StartLogging() {
 			//log.Printf("wrote %d", len(msg))
 		}
 	}
+}
+
+var LogCommands = []cli.Command{
+	{
+		Name:  "log",
+		Usage: "Print logs",
+		Action: func(c *cli.Context) {
+			StartLogging()
+		},
+	},
 }

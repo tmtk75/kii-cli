@@ -6,16 +6,6 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func Flatten(a [][]cli.Command) []cli.Command {
-	b := []cli.Command{}
-	for _, v := range a {
-		for _, i := range v {
-			b = append(b, i)
-		}
-	}
-	return b
-}
-
 func TestFlatten(t *testing.T) {
 	a_cmds := []cli.Command{
 		{Name: "add"},

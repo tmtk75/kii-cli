@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+
+	"github.com/codegangsta/cli"
 )
 
 type UserCreationRequest struct {
@@ -17,4 +19,16 @@ func CreateUser(loginname string, password string) {
 	res := HttpPostJson(path, headers, req)
 	body, _ := ioutil.ReadAll(res.Body)
 	fmt.Println(string(body))
+}
+
+var UsersCommands = []cli.Command{
+	{
+		Name:        "users:create",
+		Usage:       "Create user",
+		Description: `arguments: <loginname> <password>`,
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(2, c)
+			CreateUser(c.Args()[0], c.Args()[1])
+		},
+	},
 }

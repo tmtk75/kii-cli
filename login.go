@@ -3,8 +3,11 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/codegangsta/cli"
 )
 
 type OAuth2Request struct {
@@ -78,4 +81,26 @@ func LoginAsAppAdmin() error {
 	res := retrieveAppAdminAccessToken()
 	res.Save(metaFilePath(".token"))
 	return nil
+}
+
+var LoginCommands = []cli.Command{
+	{
+		Name:  "login",
+		Usage: "Login as AppAdmin",
+		Action: func(c *cli.Context) {
+			err := LoginAsAppAdmin()
+			if err != nil {
+				panic(err)
+			}
+		},
+	},
+	{
+		Name:  "login:info",
+		Usage: "Print login info",
+		Action: func(c *cli.Context) {
+			res := &OAuth2Response{}
+			res.Load()
+			fmt.Println(res.AccessToken)
+		},
+	},
 }
