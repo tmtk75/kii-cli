@@ -9,6 +9,7 @@ import (
 const (
 	ExitGeneralReason       = 1
 	ExitIllegalNumberOfArgs = 2
+	ExitNotLoggedIn         = 3
 )
 
 func ShowCommandHelp(argsLen int, c *cli.Context) {

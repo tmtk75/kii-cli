@@ -45,11 +45,19 @@ func (self *OAuth2Response) Save(filename string) {
 }
 
 func (self *OAuth2Response) Load() *OAuth2Response {
-	self.LoadFrom(tokenFilePath())
+	path := tokenFilePath()
+	b, _ := exists(path)
+	if !b {
+		fmt.Fprintf(os.Stderr, "You've not logged in, first `login`\n")
+		os.Exit(ExitNotLoggedIn)
+	}
+	self.LoadFrom(path)
 	return self
 }
 
 func (self *OAuth2Response) LoadFrom(path string) *OAuth2Response {
+	logger.Printf("Load %s\n", path)
+
 	file, _ := os.Open(path)
 	body, err := ioutil.ReadAll(bufio.NewReader(file))
 	if err != nil {

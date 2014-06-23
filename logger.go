@@ -19,5 +19,7 @@ type _Logger struct {
 }
 
 func (self *_Logger) Printf(format string, args ...interface{}) {
+	//_, fn, line, _ := runtime.Caller(1)
+	//f := fmt.Sprintf("%s:%d -- %s", filepath.Base(fn), line, format)
 	log.Printf(format, args...)
 }
