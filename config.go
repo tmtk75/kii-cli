@@ -28,7 +28,8 @@ func (self *GlobalConfig) EndpointUrl() string {
 	}
 	host := hosts[globalConfig.Site]
 	if host == "" {
-		panic("missing site, use --site or set KII_SITE")
+		fmt.Fprintf(os.Stderr, "missing site, use --site or set KII_SITE\n")
+		os.Exit(ExitMissingParams)
 	}
 	return fmt.Sprintf("http://%s/api", host)
 }

@@ -10,6 +10,7 @@ const (
 	ExitGeneralReason       = 1
 	ExitIllegalNumberOfArgs = 2
 	ExitNotLoggedIn         = 3
+	ExitMissingParams       = 4
 )
 
 func ShowCommandHelp(argsLen int, c *cli.Context) {
