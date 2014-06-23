@@ -117,7 +117,7 @@ func StartLogging() {
 var LogCommands = []cli.Command{
 	{
 		Name:  "log",
-		Usage: "Print logs",
+		Usage: "Disply logs for an app",
 		Action: func(c *cli.Context) {
 			StartLogging()
 		},
