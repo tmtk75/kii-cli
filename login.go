@@ -48,7 +48,7 @@ func (self *OAuth2Response) Load() *OAuth2Response {
 	path := tokenFilePath()
 	b, _ := exists(path)
 	if !b {
-		logger.Errorf("You've not logged in, first `login`\n")
+		print("You've not logged in, first `login`\n")
 		os.Exit(ExitNotLoggedIn)
 	}
 	self.LoadFrom(path)
@@ -91,7 +91,7 @@ func tokenFilePath() string {
 
 func LoginAsAppAdmin(force bool) {
 	if b, _ := exists(tokenFilePath()); b && !force {
-		logger.Errorf("Already logged in, use `--force` to login\n")
+		print("Already logged in, use `--force` to login\n")
 		os.Exit(0)
 	}
 	res := retrieveAppAdminAccessToken()

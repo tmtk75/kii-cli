@@ -17,6 +17,8 @@ type GlobalConfig struct {
 	ClientId     string
 	ClientSecret string
 	Site         string
+
+	iniFile *ini.File
 }
 
 func (self *GlobalConfig) EndpointUrl() string {
@@ -28,7 +30,7 @@ func (self *GlobalConfig) EndpointUrl() string {
 	}
 	host := hosts[globalConfig.Site]
 	if host == "" {
-		logger.Errorf("missing site, use --site or set KII_SITE\n")
+		print("missing site, use --site or set KII_SITE\n")
 		os.Exit(ExitMissingParams)
 	}
 	return fmt.Sprintf("http://%s/api", host)
@@ -121,6 +123,11 @@ func setupFlags(app *cli.App) {
 	app.Before = func(c *cli.Context) error {
 		profile := c.GlobalString("profile")
 		inifile := loadIniFile()
+		if profile != "default" && len((*inifile)[profile]) == 0 {
+			print(fmt.Sprintf("profile %s is not found in ~/.kii/config\n", profile))
+			os.Exit(ExitMissingParams)
+		}
+
 		get := func(name string) string {
 			v, _ := inifile.Get(profile, name)
 			return v
@@ -131,6 +138,7 @@ func setupFlags(app *cli.App) {
 			pickup(c.GlobalString("client-id"), os.ExpandEnv("${KII_CLIENT_ID}"), get("client_id")),
 			pickup(c.GlobalString("client-secret"), os.ExpandEnv("${KII_CLIENT_SECRET}"), get("client_secret")),
 			pickup(c.GlobalString("site"), os.ExpandEnv("${KII_SITE}"), get("site")),
+			inifile,
 		}
 		if c.Bool("verbose") {
 			logger = &_Logger{}
