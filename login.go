@@ -38,7 +38,7 @@ func (self *OAuth2Response) Bytes() []byte {
 }
 
 func (self *OAuth2Response) Save(filename string) {
-	err := ioutil.WriteFile(filename, self.Bytes(), 0644)
+	err := ioutil.WriteFile(filename, self.Bytes(), 0600)
 	if err != nil {
 		panic(err)
 	}

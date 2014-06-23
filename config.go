@@ -69,7 +69,7 @@ func metaFilePath(filename string) string {
 		panic(err)
 	}
 	confdirpath := path.Join(usr.HomeDir, ".kii")
-	err = os.MkdirAll(confdirpath, os.ModeDir|0755)
+	err = os.MkdirAll(confdirpath, os.ModeDir|0700)
 	if err != nil {
 		panic(err)
 	}
@@ -88,7 +88,7 @@ site = us
 func loadIniFile() *ini.File {
 	configPath := metaFilePath("config")
 	if b, _ := exists(configPath); !b {
-		ioutil.WriteFile(configPath, []byte(_config), 0644)
+		ioutil.WriteFile(configPath, []byte(_config), 0600)
 	}
 	file, err := ini.LoadFile(configPath)
 	if err != nil {
