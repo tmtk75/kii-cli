@@ -17,8 +17,6 @@ type GlobalConfig struct {
 	ClientId     string
 	ClientSecret string
 	Site         string
-
-	iniFile *ini.File
 }
 
 func (self *GlobalConfig) EndpointUrl() string {
@@ -138,7 +136,6 @@ func setupFlags(app *cli.App) {
 			pickup(c.GlobalString("client-id"), os.ExpandEnv("${KII_CLIENT_ID}"), get("client_id")),
 			pickup(c.GlobalString("client-secret"), os.ExpandEnv("${KII_CLIENT_SECRET}"), get("client_secret")),
 			pickup(c.GlobalString("site"), os.ExpandEnv("${KII_SITE}"), get("site")),
-			inifile,
 		}
 		if c.Bool("verbose") {
 			logger = &_Logger{}
