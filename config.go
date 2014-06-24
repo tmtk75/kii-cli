@@ -17,9 +17,13 @@ type GlobalConfig struct {
 	ClientId     string
 	ClientSecret string
 	Site         string
+	endpointUrl  string
 }
 
 func (self *GlobalConfig) EndpointUrl() string {
+	if self.endpointUrl != "" {
+		return self.endpointUrl
+	}
 	hosts := map[string]string{
 		"us": "api.kii.com",
 		"jp": "api-jp.kii.com",
@@ -114,6 +118,7 @@ func setupFlags(app *cli.App) {
 		cli.StringFlag{"client-id", "", "ClientID"},
 		cli.StringFlag{"client-secret", "", "ClientSecret"},
 		cli.StringFlag{"site", "", "us,jp,cn,sg"},
+		cli.StringFlag{"endpoint-url", "", "Site URL"},
 		cli.BoolFlag{"verbose", "Verbosely"},
 		cli.StringFlag{"profile", "default", "Profile name for ~/.kii/config"},
 	}
@@ -136,6 +141,7 @@ func setupFlags(app *cli.App) {
 			pickup(c.GlobalString("client-id"), os.ExpandEnv("${KII_CLIENT_ID}"), get("client_id")),
 			pickup(c.GlobalString("client-secret"), os.ExpandEnv("${KII_CLIENT_SECRET}"), get("client_secret")),
 			pickup(c.GlobalString("site"), os.ExpandEnv("${KII_SITE}"), get("site")),
+			pickup(c.GlobalString("endpoint-url"), os.ExpandEnv("${KII_ENDPOINT_URL}"), get("endpoint_url")),
 		}
 		if c.Bool("verbose") {
 			logger = &_Logger{}
