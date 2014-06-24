@@ -19,12 +19,27 @@ func ListBucket() {
 	}
 }
 
+func ShowBucketAcl(bucketname string) {
+	path := fmt.Sprintf("/apps/%s/buckets/%s/acl", globalConfig.AppId, bucketname)
+	headers := globalConfig.HttpHeadersWithAuthorization("")
+	body := HttpGet(path, headers).Bytes()
+	fmt.Println(string(body))
+}
+
 var BucketCommands = []cli.Command{
 	{
 		Name:  "bucket:list",
 		Usage: "List buckets",
 		Action: func(c *cli.Context) {
 			ListBucket()
+		},
+	},
+	{
+		Name:  "bucket:acl",
+		Usage: "Show a bucket ACL",
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(1, c)
+			ShowBucketAcl(c.Args()[0])
 		},
 	},
 }
