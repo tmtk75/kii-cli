@@ -29,6 +29,7 @@ func main() {
 		LoginCommands,
 		LogCommands,
 		ServerCodeCommands,
+		BucketCommands,
 		UsersCommands,
 		WSEchoCommands,
 	})
