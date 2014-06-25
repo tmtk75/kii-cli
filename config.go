@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/user"
 	"path"
@@ -143,9 +144,12 @@ func setupFlags(app *cli.App) {
 			pickup(c.GlobalString("site"), os.ExpandEnv("${KII_SITE}"), get("site")),
 			pickup(c.GlobalString("endpoint-url"), os.ExpandEnv("${KII_ENDPOINT_URL}"), get("endpoint_url")),
 		}
+
+		// Setup logger
 		if c.Bool("verbose") {
-			logger = &_Logger{}
+			logger = log.New(os.Stdout, "", log.LstdFlags)
 		}
+
 		return nil
 	}
 }
