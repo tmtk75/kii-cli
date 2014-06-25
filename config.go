@@ -147,7 +147,7 @@ func setupFlags(app *cli.App) {
 
 		// Setup logger
 		if c.Bool("verbose") {
-			logger = log.New(os.Stdout, "", log.LstdFlags)
+			logger = log.New(os.Stderr, "", log.LstdFlags)
 		}
 
 		return nil

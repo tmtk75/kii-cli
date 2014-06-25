@@ -1,8 +1,8 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
-	"os"
 )
 
-var logger = log.New(os.Stderr, "", log.LstdFlags)
+var logger = log.New(ioutil.Discard, "", log.LstdFlags)
