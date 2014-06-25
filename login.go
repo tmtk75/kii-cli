@@ -45,7 +45,7 @@ func (self *OAuth2Response) Save(filename string) {
 }
 
 func (self *OAuth2Response) Load() *OAuth2Response {
-	path := tokenFilePath()
+	path := adminTokenFilePath()
 	b, _ := exists(path)
 	if !b {
 		print("You've not logged in, first `login`\n")
@@ -85,17 +85,17 @@ func retrieveAppAdminAccessToken() *OAuth2Response {
 	return oauth2res.Decode(res)
 }
 
-func tokenFilePath() string {
-	return metaFilePath(fmt.Sprintf("%s.token", globalConfig.AppId))
+func adminTokenFilePath() string {
+	return metaFilePath(".", fmt.Sprintf("%s.token", globalConfig.AppId))
 }
 
 func LoginAsAppAdmin(force bool) {
-	if b, _ := exists(tokenFilePath()); b && !force {
+	if b, _ := exists(adminTokenFilePath()); b && !force {
 		print("Already logged in, use `--force` to login\n")
 		os.Exit(0)
 	}
 	res := retrieveAppAdminAccessToken()
-	res.Save(tokenFilePath())
+	res.Save(adminTokenFilePath())
 }
 
 var LoginCommands = []cli.Command{
