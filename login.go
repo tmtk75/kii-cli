@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 
 	"github.com/codegangsta/cli"
 )
@@ -86,7 +87,7 @@ func retrieveAppAdminAccessToken() *OAuth2Response {
 }
 
 func adminTokenFilePath() string {
-	return metaFilePath(".", fmt.Sprintf("%s.token", globalConfig.AppId))
+	return metaFilePath(".", path.Join(globalConfig.AppId, "token"))
 }
 
 func LoginAsAppAdmin(force bool) {

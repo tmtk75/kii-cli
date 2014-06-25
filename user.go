@@ -23,14 +23,19 @@ func CreateUser(loginname string, password string) {
 }
 
 func LoginAsUser(username string, password string) {
-	headers := globalConfig.HttpHeaders("application/json")
-	req := map[string]string{"username": username, "password": password}
-	res := HttpPostJson("/oauth2/token", headers, req)
-	oauth2res := &OAuth2Response{}
-	oauth2res.Decode(res)
+	dir := path.Join(globalConfig.AppId, username)
+	tokenPath := metaFilePath(dir, "token")
 
-	dir := path.Join(globalConfig.AppId, oauth2res.Id)
-	oauth2res.Save(metaFilePath(dir, username))
+	oauth2res := &OAuth2Response{}
+	if b, _ := exists(tokenPath); b {
+		oauth2res.LoadFrom(tokenPath)
+	} else {
+		headers := globalConfig.HttpHeaders("application/json")
+		req := map[string]string{"username": username, "password": password}
+		res := HttpPostJson("/oauth2/token", headers, req)
+		oauth2res.Decode(res)
+		oauth2res.Save(tokenPath)
+	}
 
 	fmt.Println(oauth2res)
 }
