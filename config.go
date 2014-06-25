@@ -102,13 +102,13 @@ func loadIniFile() *ini.File {
 	return &file
 }
 
-func pickup(a string, b string, c string) string {
-	if len(a) > 0 {
-		return a
-	} else if len(b) > 0 {
-		return b
+func pickup(a ...string) string {
+	for _, s := range a {
+		if s != "" {
+			return s
+		}
 	}
-	return c
+	return ""
 }
 
 func setupFlags(app *cli.App) {
