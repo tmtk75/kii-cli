@@ -131,17 +131,19 @@ func setupFlags(app *cli.App) {
 			os.Exit(ExitMissingParams)
 		}
 
-		get := func(name string) string {
-			v, _ := inifile.Get(profile, name)
-			return v
+		getConf := func(gn, en, un string) string {
+			ev := os.ExpandEnv("${" + en + "}")
+			uv, _ := inifile.Get(profile, un)
+			return pickup(c.GlobalString(gn), ev, uv)
 		}
+
 		globalConfig = &GlobalConfig{
-			pickup(c.GlobalString("app-id"), os.ExpandEnv("${KII_APP_ID}"), get("app_id")),
-			pickup(c.GlobalString("app-key"), os.ExpandEnv("${KII_APP_KEY}"), get("app_key")),
-			pickup(c.GlobalString("client-id"), os.ExpandEnv("${KII_CLIENT_ID}"), get("client_id")),
-			pickup(c.GlobalString("client-secret"), os.ExpandEnv("${KII_CLIENT_SECRET}"), get("client_secret")),
-			pickup(c.GlobalString("site"), os.ExpandEnv("${KII_SITE}"), get("site")),
-			pickup(c.GlobalString("endpoint-url"), os.ExpandEnv("${KII_ENDPOINT_URL}"), get("endpoint_url")),
+			AppId:        getConf("app-id", "KII_APP_ID", "app_id"),
+			AppKey:       getConf("app-key", "KII_APP_KEY", "app_key"),
+			ClientId:     getConf("client-id", "KII_CLIENT_ID", "client_id"),
+			ClientSecret: getConf("client-secret", "KII_CLIENT_SECRET", "client_secret"),
+			Site:         getConf("site", "KII_SITE", "site"),
+			endpointUrl:  getConf("endpoint-url", "KII_ENDPOINT_URL", "endpoint_url"),
 		}
 		if c.Bool("verbose") {
 			logger = &_Logger{}
