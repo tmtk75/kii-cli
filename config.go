@@ -37,7 +37,7 @@ func (self *GlobalConfig) EndpointUrl() string {
 		print("missing site, use --site or set KII_SITE\n")
 		os.Exit(ExitMissingParams)
 	}
-	return fmt.Sprintf("http://%s/api", host)
+	return fmt.Sprintf("https://%s/api", host)
 }
 
 func (self *GlobalConfig) EndpointUrlForApiLog() string {

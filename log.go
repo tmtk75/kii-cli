@@ -70,6 +70,7 @@ func StartLogging() {
 
 	url := globalConfig.EndpointUrlForApiLog()
 	logger.Printf("log-url: %s", url)
+	logger.Printf("%s", j)
 	ws, err := websocket.Dial(url, "", "http://localhost/")
 	if err != nil {
 		panic(err)
