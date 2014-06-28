@@ -87,7 +87,7 @@ func retrieveAppAdminAccessToken() *OAuth2Response {
 }
 
 func adminTokenFilePath() string {
-	return metaFilePath(".", path.Join(globalConfig.AppId, "token"))
+	return metaFilePath(path.Join(".", globalConfig.AppId), "token")
 }
 
 func LoginAsAppAdmin(force bool) {
