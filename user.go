@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"path"
+	"os"
 
 	"github.com/codegangsta/cli"
 )
@@ -18,8 +19,8 @@ func CreateUser(loginname string, password string) {
 	headers := globalConfig.HttpHeaders("application/json")
 	req := &UserCreationRequest{loginname, password}
 	res := HttpPostJson(path, headers, req)
-	body, _ := ioutil.ReadAll(res.Body)
-	fmt.Println(string(body))
+	defer res.Body.Close()
+	io.Copy(os.Stdout, res.Body)
 }
 
 func LoginAsUser(username string, password string) {
