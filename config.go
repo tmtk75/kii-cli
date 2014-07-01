@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/user"
 	"path"
 
 	"github.com/codegangsta/cli"
@@ -89,11 +88,11 @@ func exists(path string) (bool, error) {
 
 // Return ~/.kii/${filename}
 func metaFilePath(dir string, filename string) string {
-	usr, err := user.Current()
+	homedir, err := HomeDir()
 	if err != nil {
 		panic(err)
 	}
-	confdirpath := path.Join(usr.HomeDir, ".kii", dir)
+	confdirpath := path.Join(homedir, ".kii", dir)
 	err = os.MkdirAll(confdirpath, os.ModeDir|0700)
 	if err != nil {
 		panic(err)
