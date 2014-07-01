@@ -17,6 +17,7 @@ type GlobalConfig struct {
 	ClientSecret string
 	Site         string
 	endpointUrl  string
+	devlogUrl    string
 }
 
 func (self *GlobalConfig) EndpointUrl() string {
@@ -35,6 +36,24 @@ func (self *GlobalConfig) EndpointUrl() string {
 		os.Exit(ExitMissingParams)
 	}
 	return fmt.Sprintf("http://%s/api", host)
+}
+
+func (self *GlobalConfig) EndpointUrlForApiLog() string {
+	if self.devlogUrl != "" {
+		return self.devlogUrl
+	}
+	hosts := map[string]string{
+		"us": "apilog.kii.com",
+		"jp": "apilog-jp.kii.com",
+		"cn": "apilog-cn2.kii.com",
+		"sg": "apilog-sg.kii.com",
+	}
+	host := hosts[globalConfig.Site]
+	if host == "" {
+		print("missing site, use --site or set KII_SITE\n")
+		os.Exit(ExitMissingParams)
+	}
+	return fmt.Sprintf("wss://%s:443/logs", host)
 }
 
 func (self *GlobalConfig) HttpHeaders(contentType string) map[string]string {
@@ -67,12 +86,12 @@ func exists(path string) (bool, error) {
 }
 
 // Return ~/.kii/${filename}
-func metaFilePath(filename string) string {
-	dir, err := HomeDir()
+func metaFilePath(dir string, filename string) string {
+	homedir, err := HomeDir()
 	if err != nil {
 		panic(err)
 	}
-	confdirpath := path.Join(dir, ".kii")
+	confdirpath := path.Join(homedir, ".kii", dir)
 	err = os.MkdirAll(confdirpath, os.ModeDir|0700)
 	if err != nil {
 		panic(err)
@@ -90,7 +109,7 @@ site = us
 `
 
 func loadIniFile() *ini.File {
-	configPath := metaFilePath("config")
+	configPath := metaFilePath(".", "config")
 	if b, _ := exists(configPath); !b {
 		ioutil.WriteFile(configPath, []byte(_config), 0600)
 	}
@@ -141,6 +160,7 @@ func setupFlags(app *cli.App) {
 			pickup(c.GlobalString("client-secret"), os.ExpandEnv("${KII_CLIENT_SECRET}"), get("client_secret")),
 			pickup(c.GlobalString("site"), os.ExpandEnv("${KII_SITE}"), get("site")),
 			pickup(c.GlobalString("endpoint-url"), os.ExpandEnv("${KII_ENDPOINT_URL}"), get("endpoint_url")),
+			pickup("", "", get("log_url")),
 		}
 		if c.Bool("verbose") {
 			logger = &_Logger{}

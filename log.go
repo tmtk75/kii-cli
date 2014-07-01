@@ -68,7 +68,9 @@ func StartLogging() {
 	}
 	//fmt.Printf("%s", string(j))
 
-	ws, err := websocket.Dial("ws://apilog.kii.com:80/logs", "", "http://localhost/")
+	url := globalConfig.EndpointUrlForApiLog()
+	logger.Printf("log-url: %s", url)
+	ws, err := websocket.Dial(url, "", "http://localhost/")
 	if err != nil {
 		panic(err)
 	}
