@@ -31,6 +31,11 @@ You might not see any outputs, in the case, type next.
     touch foobar
     kii-cli servercode:deploy foobar
 
+Then try `log` again and you can see a line that showed you deployed a servercode.
+
+    kii-cli log
+    0001: &{servercode.file.deploy INFO Server Code File deployed 2014-07-01 14:37:27.92 +0000 UTC}
+
 TBD
 
 
