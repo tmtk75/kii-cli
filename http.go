@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type HttpResponse http.Response
@@ -43,7 +44,9 @@ func HttpDelete(path string, headers Headers) *HttpResponse {
 func httpRequest(method string, path string, headers Headers, r io.Reader) *HttpResponse {
 	ep := fmt.Sprintf("%s%s", globalConfig.EndpointUrl(), path)
 	logger.Printf("%s %s", method, ep)
-	req, err := http.NewRequest(method, ep, r)
+
+	body, _ := ioutil.ReadAll(r)
+	req, err := http.NewRequest(method, ep, bytes.NewReader(body))
 	if err != nil {
 		panic(err)
 	}
@@ -51,6 +54,8 @@ func httpRequest(method string, path string, headers Headers, r io.Reader) *Http
 		req.Header.Add(k, v)
 		logger.Printf("%s: %s\n", k, v)
 	}
+	//printCurlString(method, headers, ep, body)
+
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
@@ -62,4 +67,17 @@ func httpRequest(method string, path string, headers Headers, r io.Reader) *Http
 	}
 	hr := HttpResponse(*res)
 	return &hr
+}
+
+func printCurlString(method string, header Headers, endpoint string, body []byte) {
+	hs := make([]string, 0)
+	for k, v := range header {
+		hs = append(hs, fmt.Sprintf("-H'%s: %s'", k, v))
+	}
+	h := strings.Join(hs, " ")
+	if len(body) > 0 {
+		logger.Printf(`curl -X%s %s %s -d <body>`, method, h, endpoint)
+	} else {
+		logger.Printf(`curl -X%s %s %s`, method, h, endpoint)
+	}
 }

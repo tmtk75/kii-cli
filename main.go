@@ -30,15 +30,23 @@ func main() {
 		LogCommands,
 		ServerCodeCommands,
 		BucketCommands,
-		UsersCommands,
+		UserCommands,
 		WSEchoCommands,
 	})
 	setupFlags(app)
 	app.Run(os.Args)
 }
 
+func countAll(a [][]cli.Command) int {
+	c := 0
+	for _, v := range a {
+		c += len(v)
+	}
+	return c
+}
+
 func Flatten(a [][]cli.Command) []cli.Command {
-	b := []cli.Command{}
+	b := make([]cli.Command, 0, countAll(a))
 	for _, v := range a {
 		for _, i := range v {
 			b = append(b, i)

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/user"
 	"path"
@@ -18,6 +19,7 @@ type GlobalConfig struct {
 	ClientSecret string
 	Site         string
 	endpointUrl  string
+	devlogUrl    string
 }
 
 func (self *GlobalConfig) EndpointUrl() string {
@@ -35,7 +37,25 @@ func (self *GlobalConfig) EndpointUrl() string {
 		print("missing site, use --site or set KII_SITE\n")
 		os.Exit(ExitMissingParams)
 	}
-	return fmt.Sprintf("http://%s/api", host)
+	return fmt.Sprintf("https://%s/api", host)
+}
+
+func (self *GlobalConfig) EndpointUrlForApiLog() string {
+	if self.devlogUrl != "" {
+		return self.devlogUrl
+	}
+	hosts := map[string]string{
+		"us": "apilog.kii.com",
+		"jp": "apilog-jp.kii.com",
+		"cn": "apilog-cn2.kii.com",
+		"sg": "apilog-sg.kii.com",
+	}
+	host := hosts[globalConfig.Site]
+	if host == "" {
+		print("missing site, use --site or set KII_SITE\n")
+		os.Exit(ExitMissingParams)
+	}
+	return fmt.Sprintf("wss://%s:443/logs", host)
 }
 
 func (self *GlobalConfig) HttpHeaders(contentType string) map[string]string {
@@ -68,12 +88,12 @@ func exists(path string) (bool, error) {
 }
 
 // Return ~/.kii/${filename}
-func metaFilePath(filename string) string {
+func metaFilePath(dir string, filename string) string {
 	usr, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
-	confdirpath := path.Join(usr.HomeDir, ".kii")
+	confdirpath := path.Join(usr.HomeDir, ".kii", dir)
 	err = os.MkdirAll(confdirpath, os.ModeDir|0700)
 	if err != nil {
 		panic(err)
@@ -91,7 +111,7 @@ site = us
 `
 
 func loadIniFile() *ini.File {
-	configPath := metaFilePath("config")
+	configPath := metaFilePath(".", "config")
 	if b, _ := exists(configPath); !b {
 		ioutil.WriteFile(configPath, []byte(_config), 0600)
 	}
@@ -102,13 +122,13 @@ func loadIniFile() *ini.File {
 	return &file
 }
 
-func pickup(a string, b string, c string) string {
-	if len(a) > 0 {
-		return a
-	} else if len(b) > 0 {
-		return b
+func pickup(a ...string) string {
+	for _, s := range a {
+		if s != "" {
+			return s
+		}
 	}
-	return c
+	return ""
 }
 
 func setupFlags(app *cli.App) {
@@ -144,10 +164,14 @@ func setupFlags(app *cli.App) {
 			ClientSecret: getConf("client-secret", "KII_CLIENT_SECRET", "client_secret"),
 			Site:         getConf("site", "KII_SITE", "site"),
 			endpointUrl:  getConf("endpoint-url", "KII_ENDPOINT_URL", "endpoint_url"),
+			devlogUrl:    getConf("log-url", "KII_LOG_URL", "log_url"),
 		}
+
+		// Setup logger
 		if c.Bool("verbose") {
-			logger = &_Logger{}
+			logger = log.New(os.Stderr, "", log.LstdFlags)
 		}
+
 		return nil
 	}
 }
