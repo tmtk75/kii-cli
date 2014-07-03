@@ -31,6 +31,7 @@ func main() {
 		ServerCodeCommands,
 		BucketCommands,
 		UserCommands,
+		ObjectCommands,
 		WSEchoCommands,
 	})
 	setupFlags(app)
