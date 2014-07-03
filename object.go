@@ -30,7 +30,7 @@ func ReadObject(bucketname, objectId string) {
 var ObjectCommands = []cli.Command{
 	{
 		Name:  "object:create",
-		Usage: "Create an object",
+		Usage: "Create an object in application scope",
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(1, c)
 			CreateObject(c.Args()[0])
@@ -38,7 +38,7 @@ var ObjectCommands = []cli.Command{
 	},
 	{
 		Name:  "object:read",
-		Usage: "Read the object",
+		Usage: "Read an object in application scope",
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(2, c)
 			ReadObject(c.Args()[0], c.Args()[1])
