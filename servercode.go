@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"sort"
@@ -33,15 +34,18 @@ func DeployServerCode(serverCodePath string, activate bool) {
 	}
 }
 
+func OptionalReader(f func() io.Reader) io.Reader {
+	if terminal.IsTerminal(int(os.Stdin.Fd())) {
+		return f()
+	}
+	return os.Stdin
+}
+
 func InvokeServerCode(entryName string, version string) {
 	path := fmt.Sprintf("/apps/%s/server-code/versions/%s/%s", globalConfig.AppId, version, entryName)
 	headers := globalConfig.HttpHeadersWithAuthorization("application/json")
-	var b []byte
-	if terminal.IsTerminal(int(os.Stdin.Fd())) {
-		b = HttpPost(path, headers, strings.NewReader("{}")).Bytes()
-	} else {
-		b = HttpPost(path, headers, os.Stdin).Bytes()
-	}
+	r := OptionalReader(func() io.Reader { return strings.NewReader("{}") })
+	b := HttpPost(path, headers, r).Bytes()
 	fmt.Printf("%s\n", string(b))
 }
 
