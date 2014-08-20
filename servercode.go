@@ -148,8 +148,8 @@ var ServerCodeCommands = []cli.Command{
 		Name:  "servercode:list",
 		Usage: "List versions of server code",
 		Flags: []cli.Flag{
-			cli.BoolFlag{"quite, q", "Print only versionID"},
-			cli.BoolFlag{"active, a", "Print only active one"},
+			cli.BoolFlag{Name: "quite, q", Usage: "Print only versionID"},
+			cli.BoolFlag{Name: "active, a", Usage: "Print only active one"},
 		},
 		Action: func(c *cli.Context) {
 			ListServerCode(c.Bool("quite"), c.Bool("active"))
@@ -159,7 +159,7 @@ var ServerCodeCommands = []cli.Command{
 		Name:  "servercode:deploy",
 		Usage: "Deploy a server code",
 		Flags: []cli.Flag{
-			cli.BoolFlag{"activate", "Activate after deploying"},
+			cli.BoolFlag{Name: "activate", Usage: "Activate after deploying"},
 		},
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(1, c)

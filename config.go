@@ -132,14 +132,14 @@ func pickup(a ...string) string {
 
 func setupFlags(app *cli.App) {
 	app.Flags = []cli.Flag{
-		cli.StringFlag{"app-id", "", "AppID"},
-		cli.StringFlag{"app-key", "", "AppKey"},
-		cli.StringFlag{"client-id", "", "ClientID"},
-		cli.StringFlag{"client-secret", "", "ClientSecret"},
-		cli.StringFlag{"site", "", "us,jp,cn,sg"},
-		cli.StringFlag{"endpoint-url", "", "Site URL"},
-		cli.BoolFlag{"verbose", "Verbosely"},
-		cli.StringFlag{"profile", "default", "Profile name for ~/.kii/config"},
+		cli.StringFlag{Name: "app-id", Value: "", Usage: "AppID"},
+		cli.StringFlag{Name: "app-key", Value: "", Usage: "AppKey"},
+		cli.StringFlag{Name: "client-id", Value: "", Usage: "ClientID"},
+		cli.StringFlag{Name: "client-secret", Value: "", Usage: "ClientSecret"},
+		cli.StringFlag{Name: "site", Value: "", Usage: "us,jp,cn,sg"},
+		cli.StringFlag{Name: "endpoint-url", Value: "", Usage: "Site URL"},
+		cli.BoolFlag{Name: "verbose", Usage: "Verbosely"},
+		cli.StringFlag{Name: "profile", Value: "default", Usage: "Profile name for ~/.kii/config"},
 	}
 
 	app.Before = func(c *cli.Context) error {

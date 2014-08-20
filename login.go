@@ -104,7 +104,7 @@ var LoginCommands = []cli.Command{
 		Name:  "login",
 		Usage: "Login as AppAdmin",
 		Flags: []cli.Flag{
-			cli.BoolFlag{"force", "Force to login"},
+			cli.BoolFlag{Name: "force", Usage: "Force to login"},
 		},
 		Action: func(c *cli.Context) {
 			LoginAsAppAdmin(c.Bool("force"))
