@@ -1,4 +1,11 @@
 {
+  "kiicloud://users": [
+    {
+      "when": "USER_CREATED",
+      "what": "EXECUTE_SERVER_CODE",
+      "endpoint": "main"
+    }
+  ],
   "kiicloud://scheduler": {
     "DailyMessage_5am": {
       "cron": "49 7 * * *",
