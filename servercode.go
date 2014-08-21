@@ -200,7 +200,7 @@ var ServerCodeCommands = []cli.Command{
 		Description: "args: <servercode-path>",
 		Flags: []cli.Flag{
 			cli.BoolFlag{Name: "activate,a", Usage: "Activate after deploying"},
-			cli.StringFlag{Name: "hook-config-path", Usage: "File path to a hook config"},
+			cli.StringFlag{Name: "config-path", Usage: "File path to a hook config"},
 		},
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(1, c)
