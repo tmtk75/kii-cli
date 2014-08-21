@@ -1,6 +1,12 @@
 //
 // server code example
 //
-function main(params, ctx, done) {
-    done(Kii.getSDKVersion())
+function main(params, ctx) {
+    console.log("hello world")
+    return {
+      "versions": {
+        "storage": Kii.getSDKVersion(),
+        "analytics": KiiAnalytics.getSDKVersion(),
+      }
+    }
 }
