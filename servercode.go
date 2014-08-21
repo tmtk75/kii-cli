@@ -18,7 +18,7 @@ import (
 
 type Headers map[string]string
 
-func DeployServerCode(serverCodePath string, activate bool) {
+func DeployServerCode(serverCodePath string, activate bool) string {
 	code, err := ioutil.ReadFile(serverCodePath)
 	if err != nil {
 		panic(err)
@@ -32,6 +32,7 @@ func DeployServerCode(serverCodePath string, activate bool) {
 	if activate {
 		ActivateServerCode(ver["versionID"])
 	}
+	return ver["versionID"]
 }
 
 func OptionalReader(f func() io.Reader) io.Reader {
@@ -143,6 +144,19 @@ func DeleteServerCode(version string) {
 	fmt.Printf("%s\n", string(b))
 }
 
+func DeployHookConfig(hookConfigPath, version string) {
+	code, err := ioutil.ReadFile(hookConfigPath)
+	if err != nil {
+		panic(err)
+	}
+	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", globalConfig.AppId, version)
+	headers := globalConfig.HttpHeadersWithAuthorization("application/vnd.kii.HooksDeploymentRequest+json")
+	b := HttpPut(path, headers, bytes.NewReader(code)).Bytes()
+	var ver map[string]interface{}
+	json.Unmarshal(b, &ver)
+	fmt.Printf("%v", ver)
+}
+
 var ServerCodeCommands = []cli.Command{
 	{
 		Name:  "servercode:list",
@@ -156,14 +170,19 @@ var ServerCodeCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "servercode:deploy",
-		Usage: "Deploy a server code",
+		Name:        "servercode:deploy",
+		Usage:       "Deploy a server code",
+		Description: "args: <servercode-path>",
 		Flags: []cli.Flag{
 			cli.BoolFlag{Name: "activate", Usage: "Activate after deploying"},
+			cli.StringFlag{Name: "hook-config-path", Usage: "File path to a hook config"},
 		},
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(1, c)
-			DeployServerCode(c.Args()[0], c.Bool("activate"))
+			version := DeployServerCode(c.Args()[0], c.Bool("activate"))
+			if path := c.String("hook-config-path"); path != "" {
+				DeployHookConfig(path, version)
+			}
 		},
 	},
 	{
@@ -192,7 +211,7 @@ var ServerCodeCommands = []cli.Command{
 	{
 		Name:        "servercode:invoke",
 		Usage:       "Invoke an entry point of server code",
-		Description: "arguments: <entry-name> [version]",
+		Description: "args: <entry-name> [version]",
 		Action: func(c *cli.Context) {
 			if len(c.Args()) > 2 || len(c.Args()) == 0 {
 				cli.ShowCommandHelp(c, c.Command.Name)
@@ -215,10 +234,19 @@ var ServerCodeCommands = []cli.Command{
 	},
 	{
 		Name:  "servercode:delete",
-		Usage: "Delete an entry point of server code",
+		Usage: "Delete a version of server code",
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(1, c)
 			DeleteServerCode(c.Args()[0])
+		},
+	},
+	{
+		Name:        "servercode:hook-deploy",
+		Usage:       "Delopy a hook config",
+		Description: "args: <hooo-config-path> <version>",
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(2, c)
+			DeployHookConfig(c.Args()[0], c.Args()[1])
 		},
 	},
 }
