@@ -2,6 +2,7 @@ XC_ARCH=386 amd64
 XC_OS=linux darwin windows
 version=0.0.6
 
+## GITHUB_TOKEN is needed
 release:
 	ghr -u tmtk75 v$(version) pkg/kii-cli_linux_amd64.gz
 

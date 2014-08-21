@@ -8,6 +8,7 @@ import (
 	"path"
 
 	"github.com/codegangsta/cli"
+	"github.com/mitchellh/go-homedir"
 	"github.com/vaughan0/go-ini"
 )
 
@@ -88,7 +89,7 @@ func exists(path string) (bool, error) {
 
 // Return ~/.kii/${filename}
 func metaFilePath(dir string, filename string) string {
-	homedir, err := HomeDir()
+	homedir, err := homedir.Dir()
 	if err != nil {
 		panic(err)
 	}
