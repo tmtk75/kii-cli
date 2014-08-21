@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"sort"
 	"strings"
@@ -154,7 +155,31 @@ func DeployHookConfig(hookConfigPath, version string) {
 	b := HttpPut(path, headers, bytes.NewReader(code)).Bytes()
 	var ver map[string]interface{}
 	json.Unmarshal(b, &ver)
-	fmt.Printf("%v", ver)
+}
+
+func GetHookConfig(version string) {
+	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", globalConfig.AppId, version)
+	headers := globalConfig.HttpHeadersWithAuthorization("")
+	b := HttpGet(path, headers).Bytes()
+	fmt.Printf("%s\n", string(b))
+}
+
+func getActiveVersion(c *cli.Context) string {
+	if len(c.Args()) > 1 {
+		cli.ShowCommandHelp(c, c.Command.Name)
+		os.Exit(ExitIllegalNumberOfArgs)
+	}
+	if len(c.Args()) == 1 {
+		return c.Args()[0]
+	}
+	vers := ListVersions()
+	for _, v := range vers.Versions {
+		if v.Active {
+			return v.VersionId
+		}
+	}
+	log.Fatalf("Missing active version")
+	return ""
 }
 
 var ServerCodeCommands = []cli.Command{
@@ -189,22 +214,7 @@ var ServerCodeCommands = []cli.Command{
 		Name:  "servercode:get",
 		Usage: "Get specified server code",
 		Action: func(c *cli.Context) {
-			if len(c.Args()) > 1 {
-				cli.ShowCommandHelp(c, c.Command.Name)
-				os.Exit(ExitIllegalNumberOfArgs)
-			}
-			var ver string
-			if len(c.Args()) == 1 {
-				ver = c.Args()[0]
-			} else {
-				vers := ListVersions()
-				for _, v := range vers.Versions {
-					if v.Active {
-						ver = v.VersionId
-						break
-					}
-				}
-			}
+			ver := getActiveVersion(c)
 			GetServerCode(ver)
 		},
 	},
@@ -247,6 +257,14 @@ var ServerCodeCommands = []cli.Command{
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(2, c)
 			DeployHookConfig(c.Args()[0], c.Args()[1])
+		},
+	},
+	{
+		Name:  "servercode:hook-get",
+		Usage: "Get hook config of specified server code",
+		Action: func(c *cli.Context) {
+			ver := getActiveVersion(c)
+			GetHookConfig(ver)
 		},
 	},
 }
