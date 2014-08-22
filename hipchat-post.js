@@ -23,9 +23,7 @@ var postMessage = function(params, callback) {
 function main(params, ctx, done) {
   var params = {
       room: params.room_id,
-      from: 'name',
       message: params.message,
-      color: 'red',
   }
   postMessage(params, function(data) {
     done({params:params, ctx:ctx, data:data});
