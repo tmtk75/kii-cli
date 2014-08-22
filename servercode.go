@@ -205,7 +205,7 @@ var ServerCodeCommands = []cli.Command{
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(1, c)
 			version := DeployServerCode(c.Args()[0], c.Bool("activate"))
-			if path := c.String("hook-config-path"); path != "" {
+			if path := c.String("config-path"); path != "" {
 				DeployHookConfig(path, version)
 			}
 		},
