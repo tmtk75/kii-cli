@@ -27,6 +27,13 @@ func ReadObject(bucketname, objectId string) {
 	fmt.Printf("%s\n", string(body))
 }
 
+func DeleteObject(bucketname, objectId string) {
+	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%s", globalConfig.AppId, bucketname, objectId)
+	headers := globalConfig.HttpHeadersWithAuthorization("")
+	body := HttpDelete(path, headers).Bytes()
+	fmt.Printf("%s\n", string(body))
+}
+
 var ObjectCommands = []cli.Command{
 	{
 		Name:  "object:create",
@@ -43,6 +50,15 @@ var ObjectCommands = []cli.Command{
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(2, c)
 			ReadObject(c.Args()[0], c.Args()[1])
+		},
+	},
+	{
+		Name:        "object:delete",
+		Usage:       "Delete an object in application scope",
+		Description: "args: <bucket> <object-id>",
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(2, c)
+			DeleteObject(c.Args()[0], c.Args()[1])
 		},
 	},
 }
