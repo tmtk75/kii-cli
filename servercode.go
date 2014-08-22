@@ -164,13 +164,13 @@ func GetHookConfig(version string) {
 	fmt.Printf("%s\n", string(b))
 }
 
-func getActiveVersion(c *cli.Context) string {
-	if len(c.Args()) > 1 {
+func getActiveVersion(c *cli.Context, argLen int) string {
+	if len(c.Args()) > argLen {
 		cli.ShowCommandHelp(c, c.Command.Name)
 		os.Exit(ExitIllegalNumberOfArgs)
 	}
-	if len(c.Args()) == 1 {
-		return c.Args()[0]
+	if len(c.Args()) == argLen {
+		return c.Args()[argLen-1]
 	}
 	vers := ListVersions()
 	for _, v := range vers.Versions {
@@ -214,7 +214,7 @@ var ServerCodeCommands = []cli.Command{
 		Name:  "servercode:get",
 		Usage: "Get specified server code",
 		Action: func(c *cli.Context) {
-			ver := getActiveVersion(c)
+			ver := getActiveVersion(c, 1)
 			GetServerCode(ver)
 		},
 	},
@@ -253,17 +253,26 @@ var ServerCodeCommands = []cli.Command{
 	{
 		Name:        "servercode:hook-deploy",
 		Usage:       "Delopy a hook config",
-		Description: "args: <hooo-config-path> <version>",
+		Description: "args: <hook-config-path> [version]",
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(2, c)
-			DeployHookConfig(c.Args()[0], c.Args()[1])
+			if len(c.Args()) > 2 || len(c.Args()) == 0 {
+				cli.ShowCommandHelp(c, c.Command.Name)
+				os.Exit(ExitIllegalNumberOfArgs)
+			}
+			var ver string
+			if len(c.Args()) == 2 {
+				ver = c.Args()[1]
+			} else {
+				ver = getActiveVersion(c, 2)
+			}
+			DeployHookConfig(c.Args()[0], ver)
 		},
 	},
 	{
 		Name:  "servercode:hook-get",
 		Usage: "Get hook config of specified server code",
 		Action: func(c *cli.Context) {
-			ver := getActiveVersion(c)
+			ver := getActiveVersion(c, 1)
 			GetHookConfig(ver)
 		},
 	},
