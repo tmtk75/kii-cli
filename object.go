@@ -27,6 +27,17 @@ func ReadObject(bucketname, objectId string) {
 	fmt.Printf("%s\n", string(body))
 }
 
+func ReplaceObject(bucketname string) {
+	path := fmt.Sprintf("/apps/%s/buckets/%s/objects", globalConfig.AppId, bucketname)
+	headers := globalConfig.HttpHeadersWithAuthorization("application/json")
+	r := OptionalReader(func() io.Reader { return strings.NewReader("{}") })
+	body := HttpPut(path, headers, r).Bytes()
+
+	var j map[string]interface{}
+	json.Unmarshal(body, &j)
+	fmt.Printf("%s\n", j["objectID"])
+}
+
 func DeleteObject(bucketname, objectId string) {
 	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%s", globalConfig.AppId, bucketname, objectId)
 	headers := globalConfig.HttpHeadersWithAuthorization("")
@@ -45,7 +56,16 @@ var ObjectCommands = []cli.Command{
 	},
 	{
 		Name:        "object:read",
-		Usage:       "Read an object in application scope",
+		Usage:       "Read the object in application scope",
+		Description: "args: <bucket> <object-id>",
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(2, c)
+			ReadObject(c.Args()[0], c.Args()[1])
+		},
+	},
+	{
+		Name:        "object:replace",
+		Usage:       "Replate the object in application scope with a new one",
 		Description: "args: <bucket> <object-id>",
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(2, c)
@@ -54,7 +74,7 @@ var ObjectCommands = []cli.Command{
 	},
 	{
 		Name:        "object:delete",
-		Usage:       "Delete an object in application scope",
+		Usage:       "Delete the object in application scope",
 		Description: "args: <bucket> <object-id>",
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(2, c)
