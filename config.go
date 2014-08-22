@@ -102,12 +102,22 @@ func metaFilePath(dir string, filename string) string {
 }
 
 var globalConfig *GlobalConfig
-var _config = `[default]
+var _config = `# You can configure default profile, or --profile option is available
+# profile = jp
+
+[default]
 app_id =
 app_key =
 client_id =
 client_secret =
 site = us
+
+[jp]
+app_id =
+app_key =
+client_id =
+client_secret =
+site = jp
 `
 
 func loadIniFile() *ini.File {
@@ -131,6 +141,8 @@ func pickup(a ...string) string {
 	return ""
 }
 
+const DEFAULT_PROFILE = "default"
+
 func setupFlags(app *cli.App) {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{Name: "app-id", Value: "", Usage: "AppID"},
@@ -140,13 +152,23 @@ func setupFlags(app *cli.App) {
 		cli.StringFlag{Name: "site", Value: "", Usage: "us,jp,cn,sg"},
 		cli.StringFlag{Name: "endpoint-url", Value: "", Usage: "Site URL"},
 		cli.BoolFlag{Name: "verbose", Usage: "Verbosely"},
-		cli.StringFlag{Name: "profile", Value: "default", Usage: "Profile name for ~/.kii/config"},
+		cli.StringFlag{Name: "profile", Value: DEFAULT_PROFILE, Usage: "Profile name for ~/.kii/config"},
 	}
 
 	app.Before = func(c *cli.Context) error {
-		profile := c.GlobalString("profile")
+		// Setup logger
+		if c.Bool("verbose") {
+			logger = log.New(os.Stderr, "", log.LstdFlags)
+		}
+
 		inifile := loadIniFile()
-		if profile != "default" && len((*inifile)[profile]) == 0 {
+		profile, _ := inifile.Get("", "profile")
+		if optProf := c.GlobalString("profile"); optProf != DEFAULT_PROFILE {
+			profile = optProf
+		}
+		logger.Printf("profile: %v", profile)
+
+		if profile != DEFAULT_PROFILE && len((*inifile)[profile]) == 0 {
 			print(fmt.Sprintf("profile %s is not found in ~/.kii/config\n", profile))
 			os.Exit(ExitMissingParams)
 		}
@@ -165,11 +187,6 @@ func setupFlags(app *cli.App) {
 			Site:         getConf("site", "KII_SITE", "site"),
 			endpointUrl:  getConf("endpoint-url", "KII_ENDPOINT_URL", "endpoint_url"),
 			devlogUrl:    getConf("log-url", "KII_LOG_URL", "log_url"),
-		}
-
-		// Setup logger
-		if c.Bool("verbose") {
-			logger = log.New(os.Stderr, "", log.LstdFlags)
 		}
 
 		return nil
