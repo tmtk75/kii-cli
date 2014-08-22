@@ -37,8 +37,9 @@ var ObjectCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "object:read",
-		Usage: "Read an object in application scope",
+		Name:        "object:read",
+		Usage:       "Read an object in application scope",
+		Description: "args: <bucket> <object-id>",
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(2, c)
 			ReadObject(c.Args()[0], c.Args()[1])
