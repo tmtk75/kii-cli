@@ -19,7 +19,7 @@ hash:
 
 compress: pkg/kii-cli_win_amd64.zip pkg/kii-cli_darwin_amd64.gz pkg/kii-cli_linux_amd64.gz
 
-pkg/kii-cli_amd64.zip pkg/kii-cli_darwin_amd64.gz pkg/kii-cli_linux_amd64.gz:
+pkg/kii-cli_win_amd64.zip pkg/kii-cli_darwin_amd64.gz pkg/kii-cli_linux_amd64.gz:
 	gzip -k pkg/*_386
 	gzip -k pkg/*_amd64
 	for e in 386 amd64; do \
