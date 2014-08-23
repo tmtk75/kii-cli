@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"sort"
 	"strings"
@@ -18,7 +19,7 @@ import (
 
 type Headers map[string]string
 
-func DeployServerCode(serverCodePath string, activate bool) {
+func DeployServerCode(serverCodePath string, activate bool) string {
 	code, err := ioutil.ReadFile(serverCodePath)
 	if err != nil {
 		panic(err)
@@ -32,6 +33,7 @@ func DeployServerCode(serverCodePath string, activate bool) {
 	if activate {
 		ActivateServerCode(ver["versionID"])
 	}
+	return ver["versionID"]
 }
 
 func OptionalReader(f func() io.Reader) io.Reader {
@@ -143,6 +145,92 @@ func DeleteServerCode(version string) {
 	fmt.Printf("%s\n", string(b))
 }
 
+func AttachHookConfig(hookConfigPath, version string) {
+	code, err := ioutil.ReadFile(hookConfigPath)
+	if err != nil {
+		panic(err)
+	}
+	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", globalConfig.AppId, version)
+	headers := globalConfig.HttpHeadersWithAuthorization("application/vnd.kii.HooksDeploymentRequest+json")
+	b := HttpPut(path, headers, bytes.NewReader(code)).Bytes()
+	var ver map[string]interface{}
+	json.Unmarshal(b, &ver)
+}
+
+func GetHookConfig(version string) {
+	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", globalConfig.AppId, version)
+	headers := globalConfig.HttpHeadersWithAuthorization("")
+	b := HttpGet(path, headers).Bytes()
+	fmt.Printf("%s\n", string(b))
+}
+
+func DeleteHookConfig(version string) {
+	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", globalConfig.AppId, version)
+	headers := globalConfig.HttpHeadersWithAuthorization("")
+	b := HttpDelete(path, headers).Bytes()
+	fmt.Printf("%s\n", string(b))
+}
+
+type ExecutionResult struct {
+	Description string `json:"queryDescription"`
+	Results     []struct {
+		Id         string `json:"scheduleExecutionID"`
+		Status     string `json:"status"`
+		Name       string `json:"name"`
+		StartedAt  int64  `json:"startedAt"`
+		FinishedAt int64  `json:"finishedAt"`
+	} `json:"results"`
+}
+
+func ListExecutions() {
+	now := time.Now().Unix() * 1000
+	dayBefore1week := now - 60*60*24*7*1000 // in millisecond
+	path := fmt.Sprintf("/apps/%s/hooks/executions/query", globalConfig.AppId)
+	headers := globalConfig.HttpHeadersWithAuthorization("application/vnd.kii.ScheduleExecutionQueryRequest+json")
+	q := fmt.Sprintf(`{
+		             "scheduleExecutionQuery": {
+		               "clause": {
+		                 "type": "range",
+			         "field": "startedAt",
+			         "lowerLimit": %v,
+			         "upperLimit": %v,
+			         "lowerIncluded": true,
+			         "upperIncluded": true
+		               },
+			       "orderBy": "startedAt",
+			       "descending": false
+		             }
+		           }`, dayBefore1week, now)
+	b := HttpPost(path, headers, bytes.NewReader([]byte(q))).Bytes()
+	var r ExecutionResult
+	if err := json.Unmarshal(b, &r); err != nil {
+		panic(err)
+	}
+	for _, e := range r.Results {
+		s := time.Unix(e.StartedAt/1000, 0).Format("2006-01-02 15:04:05")
+		f := time.Unix(e.FinishedAt/1000, 0).Format("2006-01-02 15:04:05")
+		fmt.Printf("%v\t%v\t%v\t%v\t%v\n", e.Id, s, f, e.Status, e.Name)
+	}
+}
+
+func getActiveVersion(c *cli.Context, argLen int) string {
+	if len(c.Args()) > argLen {
+		cli.ShowCommandHelp(c, c.Command.Name)
+		os.Exit(ExitIllegalNumberOfArgs)
+	}
+	if len(c.Args()) == argLen {
+		return c.Args()[argLen-1]
+	}
+	vers := ListVersions()
+	for _, v := range vers.Versions {
+		if v.Active {
+			return v.VersionId
+		}
+	}
+	log.Fatalf("Missing active version")
+	return ""
+}
+
 var ServerCodeCommands = []cli.Command{
 	{
 		Name:  "servercode:list",
@@ -156,43 +244,33 @@ var ServerCodeCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "servercode:deploy",
-		Usage: "Deploy a server code",
+		Name:        "servercode:deploy",
+		Usage:       "Deploy a server code",
+		Description: "args: <servercode-path>",
 		Flags: []cli.Flag{
-			cli.BoolFlag{Name: "activate", Usage: "Activate after deploying"},
+			cli.BoolFlag{Name: "activate,a", Usage: "Activate after deploying"},
+			cli.StringFlag{Name: "config-file", Usage: "File path to a hook config"},
 		},
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(1, c)
-			DeployServerCode(c.Args()[0], c.Bool("activate"))
+			version := DeployServerCode(c.Args()[0], c.Bool("activate"))
+			if path := c.String("config-file"); path != "" {
+				AttachHookConfig(path, version)
+			}
 		},
 	},
 	{
 		Name:  "servercode:get",
 		Usage: "Get specified server code",
 		Action: func(c *cli.Context) {
-			if len(c.Args()) > 1 {
-				cli.ShowCommandHelp(c, c.Command.Name)
-				os.Exit(ExitIllegalNumberOfArgs)
-			}
-			var ver string
-			if len(c.Args()) == 1 {
-				ver = c.Args()[0]
-			} else {
-				vers := ListVersions()
-				for _, v := range vers.Versions {
-					if v.Active {
-						ver = v.VersionId
-						break
-					}
-				}
-			}
+			ver := getActiveVersion(c, 1)
 			GetServerCode(ver)
 		},
 	},
 	{
 		Name:        "servercode:invoke",
 		Usage:       "Invoke an entry point of server code",
-		Description: "arguments: <entry-name> [version]",
+		Description: "args: <entry-name> [version]",
 		Action: func(c *cli.Context) {
 			if len(c.Args()) > 2 || len(c.Args()) == 0 {
 				cli.ShowCommandHelp(c, c.Command.Name)
@@ -215,10 +293,53 @@ var ServerCodeCommands = []cli.Command{
 	},
 	{
 		Name:  "servercode:delete",
-		Usage: "Delete an entry point of server code",
+		Usage: "Delete a version of server code",
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(1, c)
 			DeleteServerCode(c.Args()[0])
+		},
+	},
+	{
+		Name:        "servercode:hook-attach",
+		Usage:       "Attach a hook config to current or specified server code",
+		Description: "args: <hook-config-path> [version]",
+		Action: func(c *cli.Context) {
+			if len(c.Args()) > 2 || len(c.Args()) == 0 {
+				cli.ShowCommandHelp(c, c.Command.Name)
+				os.Exit(ExitIllegalNumberOfArgs)
+			}
+			var ver string
+			if len(c.Args()) == 2 {
+				ver = c.Args()[1]
+			} else {
+				ver = getActiveVersion(c, 2)
+			}
+			AttachHookConfig(c.Args()[0], ver)
+		},
+	},
+	{
+		Name:        "servercode:hook-get",
+		Usage:       "Get hook the config of current or specified server code",
+		Description: "args: [version]",
+		Action: func(c *cli.Context) {
+			ver := getActiveVersion(c, 1)
+			GetHookConfig(ver)
+		},
+	},
+	{
+		Name:        "servercode:hook-delete",
+		Usage:       "Delete the hook config of current specified server code",
+		Description: "args: [version]",
+		Action: func(c *cli.Context) {
+			ver := getActiveVersion(c, 1)
+			DeleteHookConfig(ver)
+		},
+	},
+	{
+		Name:  "servercode:list-executions",
+		Usage: "List executions for 7 days before",
+		Action: func(c *cli.Context) {
+			ListExecutions()
 		},
 	},
 }

@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"io"
-	"path"
 	"os"
+	"path"
 
 	"github.com/codegangsta/cli"
 )
@@ -45,7 +45,7 @@ var UserCommands = []cli.Command{
 	{
 		Name:        "user:login",
 		Usage:       "Login as a user",
-		Description: `arguments: <loginname> <password>`,
+		Description: `args: <loginname> <password>`,
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(2, c)
 			LoginAsUser(c.Args()[0], c.Args()[1])
@@ -54,7 +54,7 @@ var UserCommands = []cli.Command{
 	{
 		Name:        "user:create",
 		Usage:       "Create a user",
-		Description: `arguments: <loginname> <password>`,
+		Description: `args: <loginname> <password>`,
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(2, c)
 			CreateUser(c.Args()[0], c.Args()[1])
