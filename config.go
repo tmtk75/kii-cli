@@ -20,6 +20,7 @@ type GlobalConfig struct {
 	Site         string
 	endpointUrl  string
 	devlogUrl    string
+	Curl         bool
 }
 
 func (self *GlobalConfig) EndpointUrl() string {
@@ -153,6 +154,7 @@ func setupFlags(app *cli.App) {
 		cli.StringFlag{Name: "endpoint-url", Value: "", Usage: "Site URL"},
 		cli.BoolFlag{Name: "verbose", Usage: "Verbosely"},
 		cli.StringFlag{Name: "profile", Value: DEFAULT_PROFILE, Usage: "Profile name for ~/.kii/config"},
+		cli.BoolFlag{Name: "curl", Usage: "Print curl command saving body as a tmp file if body exists"},
 	}
 
 	app.Before = func(c *cli.Context) error {
@@ -187,6 +189,7 @@ func setupFlags(app *cli.App) {
 			Site:         getConf("site", "KII_SITE", "site"),
 			endpointUrl:  getConf("endpoint-url", "KII_ENDPOINT_URL", "endpoint_url"),
 			devlogUrl:    getConf("log-url", "KII_LOG_URL", "log_url"),
+			Curl:         c.GlobalBool("curl"),
 		}
 
 		return nil

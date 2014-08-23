@@ -54,7 +54,10 @@ func httpRequest(method string, path string, headers Headers, r io.Reader) *Http
 		req.Header.Add(k, v)
 		logger.Printf("%s: %s\n", k, v)
 	}
-	//printCurlString(method, headers, ep, body)
+
+	if globalConfig.Curl {
+		printCurlString(method, headers, ep, body)
+	}
 
 	client := &http.Client{}
 	res, err := client.Do(req)
@@ -75,9 +78,17 @@ func printCurlString(method string, header Headers, endpoint string, body []byte
 		hs = append(hs, fmt.Sprintf("-H'%s: %s'", k, v))
 	}
 	h := strings.Join(hs, " ")
+
+	tmp, err := ioutil.TempFile(".", "req-")
+	if err != nil {
+		panic(err)
+	}
+	tmp.Write(body)
+	defer tmp.Close()
+
 	if len(body) > 0 {
-		logger.Printf(`curl -X%s %s %s -d <body>`, method, h, endpoint)
+		fmt.Printf("curl -X%s %s %s -d @%v\n\n", method, h, endpoint, tmp.Name())
 	} else {
-		logger.Printf(`curl -X%s %s %s`, method, h, endpoint)
+		fmt.Printf("curl -X%s %s %s\n\n", method, h, endpoint)
 	}
 }
