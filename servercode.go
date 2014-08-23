@@ -171,6 +171,48 @@ func DeleteHookConfig(version string) {
 	fmt.Printf("%s\n", string(b))
 }
 
+type ExecutionResult struct {
+	Description string `json:"queryDescription"`
+	Results     []struct {
+		Id         string `json:"scheduleExecutionID"`
+		Status     string `json:"status"`
+		Name       string `json:"name"`
+		StartedAt  int64  `json:"startedAt"`
+		FinishedAt int64  `json:"finishedAt"`
+	} `json:"results"`
+}
+
+func ListExecutions() {
+	now := time.Now().Unix() * 1000
+	dayBefore1week := now - 60*60*24*7*1000 // in millisecond
+	path := fmt.Sprintf("/apps/%s/hooks/executions/query", globalConfig.AppId)
+	headers := globalConfig.HttpHeadersWithAuthorization("application/vnd.kii.ScheduleExecutionQueryRequest+json")
+	q := fmt.Sprintf(`{
+		             "scheduleExecutionQuery": {
+		               "clause": {
+		                 "type": "range",
+			         "field": "startedAt",
+			         "lowerLimit": %v,
+			         "upperLimit": %v,
+			         "lowerIncluded": true,
+			         "upperIncluded": true
+		               },
+			       "orderBy": "startedAt",
+			       "descending": false
+		             }
+		           }`, dayBefore1week, now)
+	b := HttpPost(path, headers, bytes.NewReader([]byte(q))).Bytes()
+	var r ExecutionResult
+	if err := json.Unmarshal(b, &r); err != nil {
+		panic(err)
+	}
+	for _, e := range r.Results {
+		s := time.Unix(e.StartedAt/1000, 0).Format("2006-01-02 15:04:05")
+		f := time.Unix(e.FinishedAt/1000, 0).Format("2006-01-02 15:04:05")
+		fmt.Printf("%v\t%v\t%v\t%v\t%v\n", e.Id, s, f, e.Status, e.Name)
+	}
+}
+
 func getActiveVersion(c *cli.Context, argLen int) string {
 	if len(c.Args()) > argLen {
 		cli.ShowCommandHelp(c, c.Command.Name)
@@ -291,6 +333,13 @@ var ServerCodeCommands = []cli.Command{
 		Action: func(c *cli.Context) {
 			ver := getActiveVersion(c, 1)
 			DeleteHookConfig(ver)
+		},
+	},
+	{
+		Name:  "servercode:list-executions",
+		Usage: "List executions for 7 days before",
+		Action: func(c *cli.Context) {
+			ListExecutions()
 		},
 	},
 }
