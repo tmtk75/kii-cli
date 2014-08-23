@@ -79,7 +79,9 @@ func printCurlString(method string, header Headers, endpoint string, body []byte
 	}
 	h := strings.Join(hs, " ")
 
-	tmp, err := ioutil.TempFile(".", "req-")
+	// ~/.kii/${app_id}/curl.{something}
+	dataDir := fmt.Sprintf("%v", metaFilePath(globalConfig.AppId, ""))
+	tmp, err := ioutil.TempFile(dataDir, "curl-data.")
 	if err != nil {
 		panic(err)
 	}
