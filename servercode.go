@@ -145,7 +145,7 @@ func DeleteServerCode(version string) {
 	fmt.Printf("%s\n", string(b))
 }
 
-func DeployHookConfig(hookConfigPath, version string) {
+func AttachHookConfig(hookConfigPath, version string) {
 	code, err := ioutil.ReadFile(hookConfigPath)
 	if err != nil {
 		panic(err)
@@ -161,6 +161,13 @@ func GetHookConfig(version string) {
 	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", globalConfig.AppId, version)
 	headers := globalConfig.HttpHeadersWithAuthorization("")
 	b := HttpGet(path, headers).Bytes()
+	fmt.Printf("%s\n", string(b))
+}
+
+func DeleteHookConfig(version string) {
+	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", globalConfig.AppId, version)
+	headers := globalConfig.HttpHeadersWithAuthorization("")
+	b := HttpDelete(path, headers).Bytes()
 	fmt.Printf("%s\n", string(b))
 }
 
@@ -206,7 +213,7 @@ var ServerCodeCommands = []cli.Command{
 			ShowCommandHelp(1, c)
 			version := DeployServerCode(c.Args()[0], c.Bool("activate"))
 			if path := c.String("config-file"); path != "" {
-				DeployHookConfig(path, version)
+				AttachHookConfig(path, version)
 			}
 		},
 	},
@@ -251,8 +258,8 @@ var ServerCodeCommands = []cli.Command{
 		},
 	},
 	{
-		Name:        "servercode:hook-deploy",
-		Usage:       "Delopy a hook config",
+		Name:        "servercode:hook-attach",
+		Usage:       "Attach a hook config to current or specified server code",
 		Description: "args: <hook-config-path> [version]",
 		Action: func(c *cli.Context) {
 			if len(c.Args()) > 2 || len(c.Args()) == 0 {
@@ -265,15 +272,25 @@ var ServerCodeCommands = []cli.Command{
 			} else {
 				ver = getActiveVersion(c, 2)
 			}
-			DeployHookConfig(c.Args()[0], ver)
+			AttachHookConfig(c.Args()[0], ver)
 		},
 	},
 	{
-		Name:  "servercode:hook-get",
-		Usage: "Get hook config of specified server code",
+		Name:        "servercode:hook-get",
+		Usage:       "Get hook the config of current or specified server code",
+		Description: "args: [version]",
 		Action: func(c *cli.Context) {
 			ver := getActiveVersion(c, 1)
 			GetHookConfig(ver)
+		},
+	},
+	{
+		Name:        "servercode:hook-delete",
+		Usage:       "Delete the hook config of current specified server code",
+		Description: "args: [version]",
+		Action: func(c *cli.Context) {
+			ver := getActiveVersion(c, 1)
+			DeleteHookConfig(ver)
 		},
 	},
 }
