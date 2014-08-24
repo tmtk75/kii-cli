@@ -49,33 +49,45 @@ USAGE:
    kii-cli [global options] command [command options] [arguments...]
 
 VERSION:
-   0.0.4
+   0.1.0
 
 COMMANDS:
-   login                Login as AppAdmin
-   login:info           Print login info
-   log                  Disply logs for an app
-   servercode:list      List versions of server code
-   servercode:deploy    Deploy a server code
-   servercode:get       Get specified server code
-   servercode:invoke    Invoke an entry point of server code
-   servercode:activate  Activate a version
-   servercode:delete    Delete an entry point of server code
-   bucket:list          List buckets
-   bucket:acl           Show a bucket ACL
-   users:create         Create user
-   server               WebSocket echo server for testing
-   help, h              Shows a list of commands or help for one command
-
+   login			Login as AppAdmin
+   login:info			Print login info
+   log				Disply logs for an app
+   servercode:list		List versions of server code
+   servercode:deploy		Deploy a server code
+   servercode:get		Get specified server code
+   servercode:invoke		Invoke an entry point of server code
+   servercode:activate		Activate a version
+   servercode:delete		Delete a version of server code
+   servercode:hook-attach	Attach a hook config to current or specified server code
+   servercode:hook-get		Get hook the config of current or specified server code
+   servercode:hook-delete	Delete the hook config of current specified server code
+   servercode:list-executions	List executions for 7 days before
+   bucket:list			List buckets
+   bucket:acl			Show a bucket ACL
+   user:login			Login as a user
+   user:create			Create a user
+   object:create		Create an object in application scope
+   object:read			Read the object in application scope
+   object:replace		Replate the object in application scope with a new one
+   object:delete		Delete the object in application scope
+   server			WebSocket echo server for testing
+   help, h			Shows a list of commands or help for one command
+   
 GLOBAL OPTIONS:
-   --app-id             AppID
-   --app-key            AppKey
-   --client-id          ClientID
-   --client-secret      ClientSecret
-   --site               us,jp,cn,sg
-   --endpoint-url       Site URL
-   --verbose            Verbosely
-   --profile 'default'  Profile name for ~/.kii/config
-   --version, -v        print the version
-   --help, -h           show help
+   --app-id 		AppID
+   --app-key 		AppKey
+   --client-id 		ClientID
+   --client-secret 	ClientSecret
+   --site 		us,jp,cn,sg
+   --endpoint-url 	Site URL
+   --verbose		Verbosely
+   --profile 'default'	Profile name for ~/.kii/config
+   --curl		Print curl command saving body as a tmp file if body exists
+   --help, -h		show help
+   --version, -v	print the version
+   
 ```
+
