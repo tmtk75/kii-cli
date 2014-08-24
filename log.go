@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
+	"strings"
 	"text/template"
 	"time"
 
@@ -122,7 +123,8 @@ func StartLogging() {
 	}
 }
 
-type Format map[string]string
+type RawFormat map[string]string
+type Format map[string]*template.Template
 
 var format Format
 
@@ -132,10 +134,9 @@ func LoadFormat(path string) Format {
 		panic(err)
 	}
 
-	f := make(Format)
 	if !e {
 		logger.Printf("%v is missing", path)
-		return f
+		return make(Format)
 	}
 
 	body, err := ioutil.ReadFile(path)
@@ -143,37 +144,55 @@ func LoadFormat(path string) Format {
 		panic(err)
 	}
 
+	f := make(RawFormat)
 	if err := json.Unmarshal(body, &f); err != nil {
 		panic(err)
 	}
 
+	r := make(Format)
 	for k, v := range f {
-		f[k] = convertLogFormat(v)
+		s := convertLogFormat(v)
+		t, err := template.New(k).Parse(s)
+		if err != nil {
+			panic(err)
+		}
+		r[k] = t
 	}
 
-	return f
+	return r
 }
 
 // Kii official format in nodejs is ${foobar}, golang template in std pkg is {{.foobar}}
 func convertLogFormat(f string) string {
 	re, _ := regexp.Compile("\\${[a-zA-Z-_]+}")
 	k := re.ReplaceAllFunc([]byte(f), func(a []byte) []byte {
-		return []byte(fmt.Sprintf("{{.%v}}", string(a[2:len(a)-1])))
+		s := norm(string(a[2 : len(a)-1]))
+		return []byte(fmt.Sprintf("{{.%v}}", s))
 	})
 	return string(k)
+}
+
+// Kii official format may contain hyphens in key, but golang template cannot handle easily.
+// This func normalizes key to be handled in golang template.
+func norm(k string) string {
+	return strings.Replace(k, "-", "_", -1)
 }
 
 func (m *RawLog) Print(idx int) {
 	key := (*m)["key"].(string)
 	f := format[key]
-	if f == "" {
+	if f == nil {
 		fmt.Printf("%v\n", *m.Log())
 		return
 	}
 
-	t, _ := template.New(key).Parse(f)
+	i := make(RawLog)
+	for k, v := range *m {
+		i[norm(k)] = v
+	}
+
 	w := bytes.NewBuffer([]byte{})
-	t.Execute(w, *m)
+	f.Execute(w, i)
 	fmt.Printf("%v\n", w)
 }
 

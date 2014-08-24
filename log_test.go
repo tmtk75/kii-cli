@@ -20,4 +20,10 @@ func Test_converLogFormat(t *testing.T) {
 	if k != expected {
 		t.Errorf("expected %v, but %v", expected, k)
 	}
+
+	k = convertLogFormat("${entry-name}")
+	expected = "{{.entry_name}}"
+	if k != expected {
+		t.Errorf("expected %v, but %v", expected, k)
+	}
 }
