@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
-	"strings"
 	"text/template"
 	"time"
 
@@ -156,14 +155,11 @@ func LoadFormat() Format {
 }
 
 func convertLogFormat(f string) string {
-	re, _ := regexp.Compile("[a-zA-Z-_]}[^}]|[a-zA-Z-_]}$")
+	re, _ := regexp.Compile("\\${[a-zA-Z-_]+}")
 	k := re.ReplaceAllFunc([]byte(f), func(a []byte) []byte {
-		if len(a) < 3 {
-			return []byte{a[0], '}', '}'}
-		}
-		return []byte{a[0], '}', '}', a[2]}
+		return []byte(fmt.Sprintf("{{.%v}}", string(a[2:len(a)-1])))
 	})
-	return strings.Replace(string(k), "${", "{{.", -1)
+	return string(k)
 }
 
 func (m *RawLog) Print(idx int) {
