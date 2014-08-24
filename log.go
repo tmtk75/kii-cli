@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/signal"
+	"strings"
+	"text/template"
 	"time"
 
 	"github.com/codegangsta/cli"
@@ -95,7 +99,7 @@ func StartLogging() {
 			//log.Println("will read")
 			msg := <-rch
 			for i, m := range msg {
-				fmt.Printf("%04d: %s\n", i, m.Log())
+				m.Print(i)
 			}
 		}
 	}()
@@ -117,11 +121,67 @@ func StartLogging() {
 	}
 }
 
+type Format map[string]string
+
+var format Format
+
+func LoadFormat() Format {
+	path := "./format.json"
+	e, err := exists(path)
+	if err != nil {
+		panic(err)
+	}
+
+	f := make(Format)
+	if !e {
+		logger.Printf("%v is missing", path)
+		return f
+	}
+
+	body, err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := json.Unmarshal(body, &f); err != nil {
+		panic(err)
+	}
+
+	for k, v := range f {
+		f[k] = convertLogFormat(v)
+	}
+
+	return f
+}
+
+func convertLogFormat(f string) string {
+	k := strings.Replace(f, "}", "}}", -1)
+	return strings.Replace(k, "${", "{{.", -1)
+}
+
+func (m *RawLog) Print(idx int) {
+	key := (*m)["key"].(string)
+	f := format[key]
+	if f == "" {
+		//for k, v := range *m {
+		//	fmt.Printf("%v:%v ", k, v)
+		//}
+		//fmt.Printf("\n")
+		return
+	}
+
+	t, _ := template.New(key).Parse(f)
+	w := bytes.NewBuffer([]byte{})
+	t.Execute(w, *m)
+	fmt.Printf("%v\n", w)
+}
+
 var LogCommands = []cli.Command{
 	{
 		Name:  "log",
 		Usage: "Disply logs for an app",
 		Action: func(c *cli.Context) {
+			format = LoadFormat()
 			StartLogging()
 		},
 	},
