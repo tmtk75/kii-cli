@@ -1,14 +1,20 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/signal"
+	"regexp"
+	"strings"
+	"text/template"
 	"time"
 
 	"github.com/codegangsta/cli"
+	"github.com/mitchellh/go-homedir"
 
 	"code.google.com/p/go.net/websocket"
 )
@@ -95,7 +101,7 @@ func StartLogging() {
 			//log.Println("will read")
 			msg := <-rch
 			for i, m := range msg {
-				fmt.Printf("%04d: %s\n", i, m.Log())
+				m.Print(i)
 			}
 		}
 	}()
@@ -117,11 +123,92 @@ func StartLogging() {
 	}
 }
 
+type RawFormat map[string]string
+type Format map[string]*template.Template
+
+var format Format
+
+func LoadFormat(path string) Format {
+	e, err := exists(path)
+	if err != nil {
+		panic(err)
+	}
+
+	if !e {
+		logger.Printf("%v is missing", path)
+		return make(Format)
+	}
+
+	body, err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+
+	f := make(RawFormat)
+	if err := json.Unmarshal(body, &f); err != nil {
+		panic(err)
+	}
+
+	r := make(Format)
+	for k, v := range f {
+		s := convertLogFormat(v)
+		t, err := template.New(k).Parse(s)
+		if err != nil {
+			panic(err)
+		}
+		r[k] = t
+	}
+
+	return r
+}
+
+// Kii official format in nodejs is ${foobar}, golang template in std pkg is {{.foobar}}
+func convertLogFormat(f string) string {
+	re, _ := regexp.Compile("\\${[a-zA-Z-_]+}")
+	k := re.ReplaceAllFunc([]byte(f), func(a []byte) []byte {
+		s := norm(string(a[2 : len(a)-1]))
+		return []byte(fmt.Sprintf("{{.%v}}", s))
+	})
+	return string(k)
+}
+
+// Kii official format may contain hyphens in key, but golang template cannot handle easily.
+// This func normalizes key to be handled in golang template.
+func norm(k string) string {
+	return strings.Replace(k, "-", "_", -1)
+}
+
+func (m *RawLog) Print(idx int) {
+	key := (*m)["key"].(string)
+	f := format[key]
+	if f == nil {
+		fmt.Printf("%v\n", *m.Log())
+		return
+	}
+
+	i := make(RawLog)
+	for k, v := range *m {
+		i[norm(k)] = v
+	}
+
+	w := bytes.NewBuffer([]byte{})
+	f.Execute(w, i)
+	fmt.Printf("%v\n", w)
+}
+
 var LogCommands = []cli.Command{
 	{
 		Name:  "log",
 		Usage: "Disply logs for an app",
+		Flags: []cli.Flag{
+			cli.StringFlag{Name: "format-file", Usage: "File path to a format file", Value: (func() string {
+				d, _ := homedir.Dir()
+				return fmt.Sprintf("%v/.kii/format.json", d)
+			})(),
+			},
+		},
 		Action: func(c *cli.Context) {
+			format = LoadFormat(c.String("format-file"))
 			StartLogging()
 		},
 	},
