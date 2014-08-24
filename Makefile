@@ -1,6 +1,6 @@
 XC_ARCH=386 amd64
 XC_OS=linux darwin windows
-version=0.0.6
+version=0.1.0
 
 install:
 	go install
