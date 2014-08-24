@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/codegangsta/cli"
+	"github.com/mitchellh/go-homedir"
 
 	"code.google.com/p/go.net/websocket"
 )
@@ -125,8 +126,7 @@ type Format map[string]string
 
 var format Format
 
-func LoadFormat() Format {
-	path := "./format.json"
+func LoadFormat(path string) Format {
 	e, err := exists(path)
 	if err != nil {
 		panic(err)
@@ -154,6 +154,7 @@ func LoadFormat() Format {
 	return f
 }
 
+// Kii official format in nodejs is ${foobar}, golang template in std pkg is {{.foobar}}
 func convertLogFormat(f string) string {
 	re, _ := regexp.Compile("\\${[a-zA-Z-_]+}")
 	k := re.ReplaceAllFunc([]byte(f), func(a []byte) []byte {
@@ -166,6 +167,7 @@ func (m *RawLog) Print(idx int) {
 	key := (*m)["key"].(string)
 	f := format[key]
 	if f == "" {
+		fmt.Printf("%v\n", *m.Log())
 		return
 	}
 
@@ -179,8 +181,15 @@ var LogCommands = []cli.Command{
 	{
 		Name:  "log",
 		Usage: "Disply logs for an app",
+		Flags: []cli.Flag{
+			cli.StringFlag{Name: "format-file", Usage: "File path to a format file", Value: (func() string {
+				d, _ := homedir.Dir()
+				return fmt.Sprintf("%v/.kii/format.json", d)
+			})(),
+			},
+		},
 		Action: func(c *cli.Context) {
-			format = LoadFormat()
+			format = LoadFormat(c.String("format-file"))
 			StartLogging()
 		},
 	},
