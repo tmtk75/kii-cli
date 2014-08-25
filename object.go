@@ -27,6 +27,15 @@ func ReadObject(bucketname, objectId string) {
 	fmt.Printf("%s\n", string(body))
 }
 
+func QueryObject(bucketname string) {
+	path := fmt.Sprintf("/apps/%s/buckets/%s/query", globalConfig.AppId, bucketname)
+	headers := globalConfig.HttpHeadersWithAuthorization("application/vnd.kii.QueryRequest+json")
+	r := OptionalReader(func() io.Reader { return strings.NewReader(`{"bucketQuery":{"clause":{"type":"all"}}}`) })
+	body := HttpPost(path, headers, r).Bytes()
+
+	fmt.Printf("%s\n", string(body))
+}
+
 func ReplaceObject(bucketname string) {
 	path := fmt.Sprintf("/apps/%s/buckets/%s/objects", globalConfig.AppId, bucketname)
 	headers := globalConfig.HttpHeadersWithAuthorization("application/json")
@@ -61,6 +70,15 @@ var ObjectCommands = []cli.Command{
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(2, c)
 			ReadObject(c.Args()[0], c.Args()[1])
+		},
+	},
+	{
+		Name:        "object:query",
+		Usage:       "Query objects in a bucket of application scope",
+		Description: "args: <bucket>",
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(1, c)
+			QueryObject(c.Args()[0])
 		},
 	},
 	{
