@@ -162,20 +162,20 @@ func LoadFormat(path string) Format {
 	return r
 }
 
-// Kii official format in nodejs is ${foobar}, golang template in std pkg is {{.foobar}}
 func convertLogFormat(f string) string {
 	re, _ := regexp.Compile("\\${[a-zA-Z-_]+}")
 	k := re.ReplaceAllFunc([]byte(f), func(a []byte) []byte {
 		s := norm(string(a[2 : len(a)-1]))
-		return []byte(fmt.Sprintf("{{.%v}}", s))
+		return []byte(fmt.Sprintf("{{%v}}", s))
 	})
 	return string(k)
 }
 
-// Kii official format may contain hyphens in key, but golang template cannot handle easily.
-// This func normalizes key to be handled in golang template.
 func norm(k string) string {
-	return strings.Replace(k, "-", "_", -1)
+	if strings.Index(k, "-") > 0 {
+		return fmt.Sprintf(`index . "%v"`, k)
+	}
+	return fmt.Sprintf(`.%v`, k)
 }
 
 func (m *RawLog) Print(idx int) {
@@ -186,13 +186,8 @@ func (m *RawLog) Print(idx int) {
 		return
 	}
 
-	i := make(RawLog)
-	for k, v := range *m {
-		i[norm(k)] = v
-	}
-
 	w := bytes.NewBuffer([]byte{})
-	f.Execute(w, i)
+	f.Execute(w, *m)
 	fmt.Printf("%v\n", w)
 }
 

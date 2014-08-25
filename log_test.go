@@ -22,7 +22,7 @@ func Test_converLogFormat(t *testing.T) {
 	}
 
 	k = convertLogFormat("${entry-name}")
-	expected = "{{.entry_name}}"
+	expected = `{{index . "entry-name"}}`
 	if k != expected {
 		t.Errorf("expected %v, but %v", expected, k)
 	}
