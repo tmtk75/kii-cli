@@ -89,8 +89,8 @@ func printCurlString(method string, header Headers, endpoint string, body []byte
 	defer tmp.Close()
 
 	if len(body) > 0 {
-		fmt.Printf("curl -X%s %s %s -d @%v\n\n", method, h, endpoint, tmp.Name())
+		logger.Printf("curl -X%s %s %s -d @%v\n\n", method, h, endpoint, tmp.Name())
 	} else {
-		fmt.Printf("curl -X%s %s %s\n\n", method, h, endpoint)
+		logger.Printf("curl -X%s %s %s\n\n", method, h, endpoint)
 	}
 }
