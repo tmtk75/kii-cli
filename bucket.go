@@ -19,6 +19,12 @@ func ListBucket() {
 	}
 }
 
+func DeleteBucket(name string) {
+	path := fmt.Sprintf("/apps/%s/buckets/%v", globalConfig.AppId, name)
+	headers := globalConfig.HttpHeadersWithAuthorization("")
+	HttpDelete(path, headers).Bytes()
+}
+
 func ShowBucketAcl(bucketname string) {
 	path := fmt.Sprintf("/apps/%s/buckets/%s/acl", globalConfig.AppId, bucketname)
 	headers := globalConfig.HttpHeadersWithAuthorization("")
@@ -32,6 +38,14 @@ var BucketCommands = []cli.Command{
 		Usage: "List buckets",
 		Action: func(c *cli.Context) {
 			ListBucket()
+		},
+	},
+	{
+		Name:  "bucket:delete",
+		Usage: "Delete a bucket",
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(1, c)
+			DeleteBucket(c.Args()[0])
 		},
 	},
 	{
