@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
+	"os"
 	"strings"
+	"text/template"
 
 	"github.com/codegangsta/cli"
 )
@@ -20,11 +23,27 @@ func CreateObject(bucketname string) {
 	fmt.Printf("%s\n", j["objectID"])
 }
 
-func ReadObject(bucketname, objectId string) {
+func ReadObject(bucketname, objectId, templstr string) {
+	var templ *template.Template
+	if templstr != "" {
+		t, err := template.New("").Parse(templstr)
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+		templ = t
+	}
+
 	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%s", globalConfig.AppId, bucketname, objectId)
 	headers := globalConfig.HttpHeadersWithAuthorization("")
 	body := HttpGet(path, headers).Bytes()
-	fmt.Printf("%s\n", string(body))
+
+	if templ == nil {
+		fmt.Printf("%s\n", string(body))
+	} else {
+		var j map[string]interface{}
+		json.Unmarshal(body, &j)
+		templ.Execute(os.Stdout, j)
+	}
 }
 
 func QueryObject(bucketname string) {
@@ -67,9 +86,12 @@ var ObjectCommands = []cli.Command{
 		Name:        "object:read",
 		Usage:       "Read the object in application scope",
 		Description: "args: <bucket> <object-id>",
+		Flags: []cli.Flag{
+			cli.StringFlag{Name: "template", Value: "", Usage: "Template for output"},
+		},
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(2, c)
-			ReadObject(c.Args()[0], c.Args()[1])
+			ReadObject(c.Args()[0], c.Args()[1], c.String("template"))
 		},
 	},
 	{
