@@ -32,6 +32,14 @@ func ShowBucketAcl(bucketname string) {
 	fmt.Println(string(body))
 }
 
+func DeleteBucketAcl(bucketname, verb, userId string) {
+	// /apps/%s/buckets/%s/acl/QUERY_OBJECTS_IN_BUCKET/UserID:ANONYMOUS_USER
+	path := fmt.Sprintf("/apps/%s/buckets/%s/acl/%v/UserID:%v", globalConfig.AppId, bucketname, verb, userId)
+	headers := globalConfig.HttpHeadersWithAuthorization("")
+	body := HttpDelete(path, headers).Bytes()
+	fmt.Println(string(body))
+}
+
 var BucketCommands = []cli.Command{
 	{
 		Name:  "bucket:list",
@@ -50,10 +58,42 @@ var BucketCommands = []cli.Command{
 	},
 	{
 		Name:  "bucket:acl",
-		Usage: "Show a bucket ACL",
+		Usage: "Edit bucket ACL",
+		Description: `Edit bucket ACL
+
+     verb:
+         CREATE_OBJECTS_IN_BUCKET
+         QUERY_OBJECTS_IN_BUCKET
+         DROP_BUCKET_WITH_ALL_CONTENT
+
+     Special userID:
+         ANY_AUTHENTICATED_USER
+	 ANONYMOUS_USER`,
+		Subcommands: cmds,
+	},
+}
+
+var cmds = []cli.Command{
+	{
+		Name:        "read",
+		Usage:       "Read a bucket ACL",
+		Description: "args: <bucket>",
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(1, c)
 			ShowBucketAcl(c.Args()[0])
+		},
+	},
+	{
+		Name:  "delete",
+		Usage: "Delete a bucket ACL",
+		Description: `args: <bucket> <verb> <userID>
+
+   ex)  my-bucket CREATE_OBJECTS_IN_BUCKET ANONYMOUS_USER
+        my-bucket QUERY_OBJECTS_IN_BUCKET ANY_AUTHENTICATED_USER
+`,
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(3, c)
+			DeleteBucketAcl(c.Args()[0], c.Args()[1], c.Args()[2])
 		},
 	},
 }
