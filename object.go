@@ -103,15 +103,15 @@ var ObjectCommands = []cli.Command{
 			QueryObject(c.Args()[0])
 		},
 	},
-	{
-		Name:        "object:replace",
-		Usage:       "Replate the object in application scope with a new one",
-		Description: "args: <bucket> <object-id>",
-		Action: func(c *cli.Context) {
-			ShowCommandHelp(2, c)
-			ReadObject(c.Args()[0], c.Args()[1])
-		},
-	},
+	//{
+	//	Name:        "object:replace",
+	//	Usage:       "Replate the object in application scope with a new one",
+	//	Description: "args: <bucket> <object-id>",
+	//	Action: func(c *cli.Context) {
+	//		ShowCommandHelp(2, c)
+	//		ReplaceObject(c.Args()[0], c.Args()[1])
+	//	},
+	//},
 	{
 		Name:        "object:delete",
 		Usage:       "Delete the object in application scope",
