@@ -24,7 +24,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "kii-cli"
 	app.Usage = "KiiCloud command line interface"
-	app.Version = "0.1.0"
+	app.Version = "0.1.1"
 	app.Commands = Flatten([][]cli.Command{
 		LoginCommands,
 		LogCommands,
