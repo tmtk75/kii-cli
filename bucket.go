@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/codegangsta/cli"
 )
@@ -25,10 +26,14 @@ func DeleteBucket(name string) {
 	HttpDelete(path, headers).Bytes()
 }
 
-func ShowBucketAcl(bucketname string) {
+func readBucketAcl(bucketname string) []byte {
 	path := fmt.Sprintf("/apps/%s/buckets/%s/acl", globalConfig.AppId, bucketname)
 	headers := globalConfig.HttpHeadersWithAuthorization("")
 	body := HttpGet(path, headers).Bytes()
+	return body
+}
+func ReadBucketAcl(bucketname string) {
+	body := readBucketAcl(bucketname)
 	fmt.Println(string(body))
 }
 
@@ -38,6 +43,23 @@ func DeleteBucketAcl(bucketname, verb, userId string) {
 	headers := globalConfig.HttpHeadersWithAuthorization("")
 	body := HttpDelete(path, headers).Bytes()
 	fmt.Println(string(body))
+}
+
+func DeleteAllBucketAcls(bucketname string) {
+	body := readBucketAcl(bucketname)
+	var j map[string][]struct {
+		UserId string `json:"userID"`
+	}
+	err := json.Unmarshal(body, &j)
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+	for verb, v := range j {
+		for _, e := range v {
+			logger.Printf("%v:%v\n", verb, e.UserId)
+			DeleteBucketAcl(bucketname, verb, e.UserId)
+		}
+	}
 }
 
 var BucketCommands = []cli.Command{
@@ -80,7 +102,7 @@ var cmds = []cli.Command{
 		Description: "args: <bucket>",
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(1, c)
-			ShowBucketAcl(c.Args()[0])
+			ReadBucketAcl(c.Args()[0])
 		},
 	},
 	{
@@ -89,11 +111,19 @@ var cmds = []cli.Command{
 		Description: `args: <bucket> <verb> <userID>
 
    ex)  my-bucket CREATE_OBJECTS_IN_BUCKET ANONYMOUS_USER
-        my-bucket QUERY_OBJECTS_IN_BUCKET ANY_AUTHENTICATED_USER
-`,
+        my-bucket QUERY_OBJECTS_IN_BUCKET ANY_AUTHENTICATED_USER`,
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(3, c)
 			DeleteBucketAcl(c.Args()[0], c.Args()[1], c.Args()[2])
+		},
+	},
+	{
+		Name:        "delete-all",
+		Usage:       "Delete all ACLs",
+		Description: "args: <bucket>",
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(1, c)
+			DeleteAllBucketAcls(c.Args()[0])
 		},
 	},
 }
