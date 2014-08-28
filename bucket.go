@@ -56,7 +56,7 @@ func DeleteAllBucketAcls(bucketname string) {
 	}
 	for verb, v := range j {
 		for _, e := range v {
-			logger.Printf("%v:%v\n", verb, e.UserId)
+			//logger.Printf("%v:%v\n", verb, e.UserId)
 			DeleteBucketAcl(bucketname, verb, e.UserId)
 		}
 	}
