@@ -20,6 +20,13 @@ func ListBucket() {
 	}
 }
 
+func ReadBucket(bucketname string) {
+	path := fmt.Sprintf("/apps/%s/buckets/%s", globalConfig.AppId, bucketname)
+	headers := globalConfig.HttpHeadersWithAuthorization("")
+	body := HttpGet(path, headers).Bytes()
+	fmt.Println(string(body))
+}
+
 func DeleteBucket(name string) {
 	path := fmt.Sprintf("/apps/%s/buckets/%v", globalConfig.AppId, name)
 	headers := globalConfig.HttpHeadersWithAuthorization("")
@@ -32,6 +39,7 @@ func readBucketAcl(bucketname string) []byte {
 	body := HttpGet(path, headers).Bytes()
 	return body
 }
+
 func ReadBucketAcl(bucketname string) {
 	body := readBucketAcl(bucketname)
 	fmt.Println(string(body))
@@ -68,6 +76,14 @@ var BucketCommands = []cli.Command{
 		Usage: "List buckets",
 		Action: func(c *cli.Context) {
 			ListBucket()
+		},
+	},
+	{
+		Name:  "bucket:read",
+		Usage: "Read a bucket",
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(1, c)
+			ReadBucket(c.Args()[0])
 		},
 	},
 	{
