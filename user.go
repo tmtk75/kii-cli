@@ -50,6 +50,13 @@ func ListUsers() {
 	fmt.Println(string(b))
 }
 
+func DeleteUser(userId string) {
+	path := fmt.Sprintf("/apps/%s/users/%v", globalConfig.AppId, userId)
+	headers := globalConfig.HttpHeadersWithAuthorization("")
+	b := HttpDelete(path, headers).Bytes()
+	fmt.Println(string(b))
+}
+
 var UserCommands = []cli.Command{
 	{
 		Name:        "user:login",
@@ -75,6 +82,14 @@ var UserCommands = []cli.Command{
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(0, c)
 			ListUsers()
+		},
+	},
+	{
+		Name:  "user:delete",
+		Usage: "Delete a user",
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(1, c)
+			DeleteUser(c.Args()[0])
 		},
 	},
 }
