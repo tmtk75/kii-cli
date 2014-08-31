@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/codegangsta/cli"
 )
@@ -41,6 +42,14 @@ func LoginAsUser(username string, password string) {
 	fmt.Println(oauth2res)
 }
 
+func ListUsers() {
+	path := fmt.Sprintf("/apps/%s/users/query", globalConfig.AppId)
+	headers := globalConfig.HttpHeadersWithAuthorization("application/vnd.kii.userqueryrequest+json")
+	body := strings.NewReader(`{"userQuery":{"clause":{"type":"all"}}}`)
+	b := HttpPost(path, headers, body).Bytes()
+	fmt.Println(string(b))
+}
+
 var UserCommands = []cli.Command{
 	{
 		Name:        "user:login",
@@ -58,6 +67,14 @@ var UserCommands = []cli.Command{
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(2, c)
 			CreateUser(c.Args()[0], c.Args()[1])
+		},
+	},
+	{
+		Name:  "user:list",
+		Usage: "List users",
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(0, c)
+			ListUsers()
 		},
 	},
 }
