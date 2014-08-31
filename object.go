@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -75,13 +76,23 @@ func DeleteObject(bucketname, objectId string) {
 }
 
 func AttachObjectBody(bucketname, objectId, conttype string) {
-	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%v", globalConfig.AppId, bucketname, objectId)
+	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%v/body", globalConfig.AppId, bucketname, objectId)
 	headers := globalConfig.HttpHeadersWithAuthorization(conttype)
 	r := OptionalReader(func() io.Reader {
 		log.Fatalf(colorstring.Color("[red]object body must be given thru stdin"))
 		return nil
 	})
 	body := HttpPut(path, headers, r).Bytes()
+	fmt.Printf("%v", string(body))
+}
+
+func PublishObjectBody(bucketname, objectId string) {
+	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%v/body/publish", globalConfig.AppId, bucketname, objectId)
+	headers := globalConfig.HttpHeadersWithAuthorization("application/vnd.kii.ObjectBodyPublicationRequest+json")
+	//req := map[string]int64{"expiresAt":}
+	req := map[string]int64{"expiresIn": 60 * 3 /*sec*/}
+	j, _ := json.Marshal(req)
+	body := HttpPost(path, headers, bytes.NewReader(j)).Bytes()
 	fmt.Printf("%v", string(body))
 }
 
@@ -144,6 +155,15 @@ var ObjectCommands = []cli.Command{
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(3, c)
 			AttachObjectBody(c.Args()[0], c.Args()[1], c.Args()[2])
+		},
+	},
+	{
+		Name:        "object:body-publish",
+		Usage:       "Publish a body of object in application scope",
+		Description: `args: <bucket> <object-id>`,
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(2, c)
+			PublishObjectBody(c.Args()[0], c.Args()[1])
 		},
 	},
 }
