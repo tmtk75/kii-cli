@@ -42,6 +42,13 @@ func LoginAsUser(username string, password string) {
 	fmt.Println(oauth2res)
 }
 
+func ReadUser(userId string) {
+	path := fmt.Sprintf("/apps/%s/users/%v", globalConfig.AppId, userId)
+	headers := globalConfig.HttpHeadersWithAuthorization("application/json")
+	b := HttpGet(path, headers).Bytes()
+	fmt.Println(string(b))
+}
+
 func ListUsers() {
 	path := fmt.Sprintf("/apps/%s/users/query", globalConfig.AppId)
 	headers := globalConfig.HttpHeadersWithAuthorization("application/vnd.kii.userqueryrequest+json")
@@ -59,21 +66,21 @@ func DeleteUser(userId string) {
 
 var UserCommands = []cli.Command{
 	{
-		Name:        "user:login",
-		Usage:       "Login as a user",
-		Description: `args: <loginname> <password>`,
-		Action: func(c *cli.Context) {
-			ShowCommandHelp(2, c)
-			LoginAsUser(c.Args()[0], c.Args()[1])
-		},
-	},
-	{
 		Name:        "user:create",
 		Usage:       "Create a user",
 		Description: `args: <loginname> <password>`,
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(2, c)
 			CreateUser(c.Args()[0], c.Args()[1])
+		},
+	},
+	{
+		Name:        "user:read",
+		Usage:       "Read a user",
+		Description: `args: <userId>`,
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(1, c)
+			ReadUser(c.Args()[0])
 		},
 	},
 	{
@@ -85,11 +92,21 @@ var UserCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "user:delete",
-		Usage: "Delete a user",
+		Name:        "user:delete",
+		Usage:       "Delete a user",
+		Description: `args: <userId>`,
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(1, c)
 			DeleteUser(c.Args()[0])
+		},
+	},
+	{
+		Name:        "user:login",
+		Usage:       "Login as a user",
+		Description: `args: <loginname> <password>`,
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(2, c)
+			LoginAsUser(c.Args()[0], c.Args()[1])
 		},
 	},
 }
