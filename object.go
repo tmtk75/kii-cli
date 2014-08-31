@@ -10,6 +10,7 @@ import (
 	"text/template"
 
 	"github.com/codegangsta/cli"
+	"github.com/mitchellh/colorstring"
 )
 
 func CreateObject(bucketname string) {
@@ -73,6 +74,17 @@ func DeleteObject(bucketname, objectId string) {
 	fmt.Printf("%s\n", string(body))
 }
 
+func AttachObjectBody(bucketname, objectId, conttype string) {
+	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%v", globalConfig.AppId, bucketname, objectId)
+	headers := globalConfig.HttpHeadersWithAuthorization(conttype)
+	r := OptionalReader(func() io.Reader {
+		log.Fatalf(colorstring.Color("[red]object body must be given thru stdin"))
+		return nil
+	})
+	body := HttpPut(path, headers, r).Bytes()
+	fmt.Printf("%v", string(body))
+}
+
 var ObjectCommands = []cli.Command{
 	{
 		Name:  "object:create",
@@ -119,6 +131,19 @@ var ObjectCommands = []cli.Command{
 		Action: func(c *cli.Context) {
 			ShowCommandHelp(2, c)
 			DeleteObject(c.Args()[0], c.Args()[1])
+		},
+	},
+	{
+		Name:  "object:body-attach",
+		Usage: "Attach body to an object in application scope",
+		Description: `args: <bucket> <object-id> <content-type>
+
+   ex)
+     dogs 4c8aaf60-3166-11e4-a448-12315004cc43 image/png < mydog.png
+`,
+		Action: func(c *cli.Context) {
+			ShowCommandHelp(3, c)
+			AttachObjectBody(c.Args()[0], c.Args()[1], c.Args()[2])
 		},
 	},
 }
