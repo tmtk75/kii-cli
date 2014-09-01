@@ -6,6 +6,11 @@
 go get github.com/tmtk75/kii-cli
 ```
 
+or
+
+Download binary from <https://github.com/tmtk75/kii-cli/releases>
+
+
 # Getting Started
 
 Create config file in `~/.kii/config` as follow.
