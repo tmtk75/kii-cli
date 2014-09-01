@@ -121,16 +121,17 @@ client_secret =
 site = jp
 `
 
-func loadIniFile() *ini.File {
+func loadIniFile() (*ini.File, bool /* true: generated config */) {
 	configPath := metaFilePath(".", "config")
 	if b, _ := exists(configPath); !b {
 		ioutil.WriteFile(configPath, []byte(_config), 0600)
+		return nil, true
 	}
 	file, err := ini.LoadFile(configPath)
 	if err != nil {
 		panic(err)
 	}
-	return &file
+	return &file, false
 }
 
 func pickup(a ...string) string {
@@ -163,8 +164,16 @@ func setupFlags(app *cli.App) {
 			logger = log.New(os.Stderr, "", log.LstdFlags)
 		}
 
-		inifile := loadIniFile()
+		inifile, gen := loadIniFile()
+		if gen {
+			print(fmt.Sprintf("~/.kii/config was created. please fill it with your credentials.\n"))
+			os.Exit(ExitGeneralReason)
+		}
+
 		profile, _ := inifile.Get("", "profile")
+		if profile == "" {
+			profile = DEFAULT_PROFILE
+		}
 		if optProf := c.GlobalString("profile"); optProf != DEFAULT_PROFILE {
 			profile = optProf
 		}
