@@ -213,13 +213,10 @@ func ListExecutions() {
 	}
 }
 
-func getActiveVersion(c *cli.Context, argLen int) string {
-	if len(c.Args()) > argLen {
-		cli.ShowCommandHelp(c, c.Command.Name)
-		os.Exit(ExitIllegalNumberOfArgs)
-	}
-	if len(c.Args()) == argLen {
-		return c.Args()[argLen-1]
+func getActiveVersion(c *cli.Context) string {
+	ver, b := c.ArgFor("version")
+	if b {
+		return ver
 	}
 	vers := ListVersions()
 	for _, v := range vers.Versions {
@@ -305,10 +302,7 @@ var ServerCodeCommands = []cli.Command{
 		Args:  "<hook-config-path> [version]",
 		Action: func(c *cli.Context) {
 			path, _ := c.ArgFor("hook-config-path")
-			ver, b := c.ArgFor("version")
-			if !b {
-				ver = getActiveVersion(c, 2)
-			}
+			ver := getActiveVersion(c)
 			AttachHookConfig(path, ver)
 		},
 	},
@@ -317,10 +311,7 @@ var ServerCodeCommands = []cli.Command{
 		Usage: "Get hook the config of current or specified server code",
 		Args:  "[version]",
 		Action: func(c *cli.Context) {
-			ver, b := c.ArgFor("version")
-			if !b {
-				ver = getActiveVersion(c, 1)
-			}
+			ver := getActiveVersion(c)
 			GetHookConfig(ver)
 		},
 	},
@@ -329,10 +320,7 @@ var ServerCodeCommands = []cli.Command{
 		Usage: "Delete the hook config of current specified server code",
 		Args:  "[version]",
 		Action: func(c *cli.Context) {
-			ver, b := c.ArgFor("version")
-			if !b {
-				ver = getActiveVersion(c, 1)
-			}
+			ver := getActiveVersion(c)
 			DeleteHookConfig(ver)
 		},
 	},
