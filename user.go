@@ -66,47 +66,48 @@ func DeleteUser(userId string) {
 
 var UserCommands = []cli.Command{
 	{
-		Name:        "user:create",
-		Usage:       "Create a user",
-		Description: `args: <loginname> <password>`,
+		Name:  "user:create",
+		Usage: "Create a user",
+		Args:  `<loginname> <password>`,
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(2, c)
-			CreateUser(c.Args()[0], c.Args()[1])
+			name, _ := c.ArgFor("loginname")
+			pass, _ := c.ArgFor("password")
+			CreateUser(name, pass)
 		},
 	},
 	{
-		Name:        "user:read",
-		Usage:       "Read a user",
-		Description: `args: <userId>`,
+		Name:  "user:read",
+		Usage: "Read a user",
+		Args:  `<user-id>`,
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(1, c)
-			ReadUser(c.Args()[0])
+			uid, _ := c.ArgFor("user-id")
+			ReadUser(uid)
 		},
 	},
 	{
 		Name:  "user:list",
 		Usage: "List users",
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(0, c)
 			ListUsers()
 		},
 	},
 	{
-		Name:        "user:delete",
-		Usage:       "Delete a user",
-		Description: `args: <userId>`,
+		Name:  "user:delete",
+		Usage: "Delete a user",
+		Args:  `<user-id>`,
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(1, c)
-			DeleteUser(c.Args()[0])
+			uid, _ := c.ArgFor("user-id")
+			DeleteUser(uid)
 		},
 	},
 	{
-		Name:        "user:login",
-		Usage:       "Login as a user",
-		Description: `args: <loginname> <password>`,
+		Name:  "user:login",
+		Usage: "Login as a user",
+		Args:  `<loginname> <password>`,
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(2, c)
-			LoginAsUser(c.Args()[0], c.Args()[1])
+			name, _ := c.ArgFor("loginname")
+			pass, _ := c.ArgFor("password")
+			LoginAsUser(name, pass)
 		},
 	},
 }

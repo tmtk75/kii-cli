@@ -244,16 +244,16 @@ var ServerCodeCommands = []cli.Command{
 		},
 	},
 	{
-		Name:        "servercode:deploy",
-		Usage:       "Deploy a server code",
-		Description: "args: <servercode-path>",
+		Name:  "servercode:deploy",
+		Usage: "Deploy a server code",
+		Args:  "<servercode-path>",
 		Flags: []cli.Flag{
 			cli.BoolFlag{Name: "activate,a", Usage: "Activate after deploying"},
 			cli.StringFlag{Name: "config-file", Usage: "File path to a hook config"},
 		},
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(1, c)
-			version := DeployServerCode(c.Args()[0], c.Bool("activate"))
+			p, _ := c.ArgFor("servercode-path")
+			version := DeployServerCode(p, c.Bool("activate"))
 			if path := c.String("config-file"); path != "" {
 				AttachHookConfig(path, version)
 			}
@@ -262,76 +262,77 @@ var ServerCodeCommands = []cli.Command{
 	{
 		Name:  "servercode:get",
 		Usage: "Get specified server code",
+		Args:  "<version>",
 		Action: func(c *cli.Context) {
-			ver := getActiveVersion(c, 1)
+			ver, _ := c.ArgFor("version")
 			GetServerCode(ver)
 		},
 	},
 	{
-		Name:        "servercode:invoke",
-		Usage:       "Invoke an entry point of server code",
-		Description: "args: <entry-name> [version]",
+		Name:  "servercode:invoke",
+		Usage: "Invoke an entry point of server code",
+		Args:  "<entry-name> [version]",
 		Action: func(c *cli.Context) {
-			if len(c.Args()) > 2 || len(c.Args()) == 0 {
-				cli.ShowCommandHelp(c, c.Command.Name)
-				os.Exit(ExitIllegalNumberOfArgs)
+			name, _ := c.ArgFor("entry-name")
+			ver, b := c.ArgFor("version")
+			if !b {
+				ver = "current"
 			}
-			version := "current"
-			if len(c.Args()) == 2 {
-				version = c.Args()[1]
-			}
-			InvokeServerCode(c.Args()[0], version)
+			InvokeServerCode(name, ver)
 		},
 	},
 	{
 		Name:  "servercode:activate",
 		Usage: "Activate a version",
+		Args:  "<version>",
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(1, c)
-			ActivateServerCode(c.Args()[0])
+			ver, _ := c.ArgFor("version")
+			ActivateServerCode(ver)
 		},
 	},
 	{
 		Name:  "servercode:delete",
 		Usage: "Delete a version of server code",
+		Args:  "<version>",
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(1, c)
-			DeleteServerCode(c.Args()[0])
+			ver, _ := c.ArgFor("version")
+			DeleteServerCode(ver)
 		},
 	},
 	{
-		Name:        "servercode:hook-attach",
-		Usage:       "Attach a hook config to current or specified server code",
-		Description: "args: <hook-config-path> [version]",
+		Name:  "servercode:hook-attach",
+		Usage: "Attach a hook config to current or specified server code",
+		Args:  "<hook-config-path> [version]",
 		Action: func(c *cli.Context) {
-			if len(c.Args()) > 2 || len(c.Args()) == 0 {
-				cli.ShowCommandHelp(c, c.Command.Name)
-				os.Exit(ExitIllegalNumberOfArgs)
-			}
-			var ver string
-			if len(c.Args()) == 2 {
-				ver = c.Args()[1]
-			} else {
+			path, _ := c.ArgFor("hook-config-path")
+			ver, b := c.ArgFor("version")
+			if !b {
 				ver = getActiveVersion(c, 2)
 			}
-			AttachHookConfig(c.Args()[0], ver)
+			AttachHookConfig(path, ver)
 		},
 	},
 	{
-		Name:        "servercode:hook-get",
-		Usage:       "Get hook the config of current or specified server code",
-		Description: "args: [version]",
+		Name:  "servercode:hook-get",
+		Usage: "Get hook the config of current or specified server code",
+		Args:  "[version]",
 		Action: func(c *cli.Context) {
-			ver := getActiveVersion(c, 1)
+			ver, b := c.ArgFor("version")
+			if !b {
+				ver = getActiveVersion(c, 1)
+			}
 			GetHookConfig(ver)
 		},
 	},
 	{
-		Name:        "servercode:hook-delete",
-		Usage:       "Delete the hook config of current specified server code",
-		Description: "args: [version]",
+		Name:  "servercode:hook-delete",
+		Usage: "Delete the hook config of current specified server code",
+		Args:  "[version]",
 		Action: func(c *cli.Context) {
-			ver := getActiveVersion(c, 1)
+			ver, b := c.ArgFor("version")
+			if !b {
+				ver = getActiveVersion(c, 1)
+			}
 			DeleteHookConfig(ver)
 		},
 	},
