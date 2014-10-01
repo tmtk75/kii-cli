@@ -8,7 +8,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/codegangsta/cli"
+	"github.com/tmtk75/cli"
 )
 
 type OAuth2Request struct {

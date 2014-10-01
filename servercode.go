@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codegangsta/cli"
+	"github.com/tmtk75/cli"
 
 	"code.google.com/p/go.crypto/ssh/terminal"
 )

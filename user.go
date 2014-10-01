@@ -7,7 +7,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/codegangsta/cli"
+	"github.com/tmtk75/cli"
 )
 
 type UserCreationRequest struct {

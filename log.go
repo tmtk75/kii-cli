@@ -13,8 +13,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/codegangsta/cli"
 	"github.com/mitchellh/go-homedir"
+	"github.com/tmtk75/cli"
 
 	"code.google.com/p/go.net/websocket"
 )

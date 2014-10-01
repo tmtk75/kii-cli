@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/codegangsta/cli"
+	"github.com/tmtk75/cli"
 )
 
 const (
@@ -24,7 +24,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "kii-cli"
 	app.Usage = "KiiCloud command line interface"
-	app.Version = "0.1.1"
+	app.Version = "0.1.2"
 	app.Commands = Flatten([][]cli.Command{
 		LoginCommands,
 		LogCommands,

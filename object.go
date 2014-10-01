@@ -10,8 +10,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/codegangsta/cli"
 	"github.com/mitchellh/colorstring"
+	"github.com/tmtk75/cli"
 )
 
 func createObject(bucketname string, r io.Reader) map[string]interface{} {

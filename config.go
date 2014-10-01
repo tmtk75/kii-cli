@@ -7,8 +7,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/codegangsta/cli"
 	"github.com/mitchellh/go-homedir"
+	"github.com/tmtk75/cli"
 	"github.com/vaughan0/go-ini"
 )
 
