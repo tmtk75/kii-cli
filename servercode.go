@@ -259,9 +259,9 @@ var ServerCodeCommands = []cli.Command{
 	{
 		Name:  "servercode:get",
 		Usage: "Get specified server code",
-		Args:  "<version>",
+		Args:  "[version]",
 		Action: func(c *cli.Context) {
-			ver, _ := c.ArgFor("version")
+			ver := getActiveVersion(c)
 			GetServerCode(ver)
 		},
 	},
