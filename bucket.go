@@ -72,14 +72,14 @@ func DeleteAllBucketAcls(bucketname string) {
 
 var BucketCommands = []cli.Command{
 	{
-		Name:  "bucket:list",
+		Name:  "list",
 		Usage: "List buckets",
 		Action: func(c *cli.Context) {
 			ListBucket()
 		},
 	},
 	{
-		Name:  "bucket:read",
+		Name:  "read",
 		Usage: "Read a bucket",
 		Args:  "<bucket-id>",
 		Action: func(c *cli.Context) {
@@ -88,7 +88,7 @@ var BucketCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "bucket:delete",
+		Name:  "delete",
 		Usage: "Delete a bucket",
 		Args:  "<bucket-id>",
 		Action: func(c *cli.Context) {
@@ -97,7 +97,7 @@ var BucketCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "bucket:acl",
+		Name:  "acl",
 		Usage: "Edit bucket ACL",
 		Description: `Edit bucket ACL
 

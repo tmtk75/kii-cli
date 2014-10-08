@@ -66,7 +66,7 @@ func DeleteUser(userId string) {
 
 var UserCommands = []cli.Command{
 	{
-		Name:  "user:create",
+		Name:  "create",
 		Usage: "Create a user",
 		Args:  `<loginname> <password>`,
 		Action: func(c *cli.Context) {
@@ -76,7 +76,7 @@ var UserCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "user:read",
+		Name:  "read",
 		Usage: "Read a user",
 		Args:  `<user-id>`,
 		Action: func(c *cli.Context) {
@@ -85,14 +85,14 @@ var UserCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "user:list",
+		Name:  "list",
 		Usage: "List users",
 		Action: func(c *cli.Context) {
 			ListUsers()
 		},
 	},
 	{
-		Name:  "user:delete",
+		Name:  "delete",
 		Usage: "Delete a user",
 		Args:  `<user-id>`,
 		Action: func(c *cli.Context) {
@@ -101,7 +101,7 @@ var UserCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "user:login",
+		Name:  "login",
 		Usage: "Login as a user",
 		Args:  `<loginname> <password>`,
 		Action: func(c *cli.Context) {

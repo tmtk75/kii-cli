@@ -20,38 +20,73 @@ func ShowCommandHelp(argsLen int, c *cli.Context) {
 	}
 }
 
+type pair struct {
+	prefix   cli.Command
+	commands []cli.Command
+}
+
+var commands = []pair{}
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "kii-cli"
 	app.Usage = "KiiCloud command line interface"
 	app.Version = "0.1.2"
-	app.Commands = Flatten([][]cli.Command{
-		LoginCommands,
-		LogCommands,
-		ServerCodeCommands,
-		BucketCommands,
-		UserCommands,
-		ObjectCommands,
-		AppCommands,
-		WSEchoCommands,
-	})
+	app.Commands = []cli.Command{
+		cli.Command{
+			Name:        "auth",
+			Usage:       "Authentication",
+			Subcommands: LoginCommands,
+		},
+		cli.Command{
+			Name:        "app",
+			Usage:       "Application management",
+			Subcommands: AppCommands,
+		},
+		LogCommands[0],
+		cli.Command{
+			Name:        "servercode",
+			Usage:       "Server code management",
+			Subcommands: ServerCodeCommands,
+		},
+		cli.Command{
+			Name:        "user",
+			Usage:       "User management",
+			Subcommands: UserCommands,
+		},
+		cli.Command{
+			Name:        "bucket",
+			Usage:       "Bucket management",
+			Subcommands: BucketCommands,
+		},
+		cli.Command{
+			Name:        "object",
+			Usage:       "Object management",
+			Subcommands: ObjectCommands,
+		},
+		cli.Command{
+			Name:        "dev",
+			Usage:       "Development support",
+			Subcommands: WSEchoCommands,
+		},
+	}
+	if os.Getenv("FLAT") != "" {
+		app.Commands = Flatten(app.Commands)
+	}
 	setupFlags(app)
 	app.Run(os.Args)
 }
 
-func countAll(a [][]cli.Command) int {
-	c := 0
+func Flatten(a []cli.Command) []cli.Command {
+	b := make([]cli.Command, 0, 16)
 	for _, v := range a {
-		c += len(v)
-	}
-	return c
-}
-
-func Flatten(a [][]cli.Command) []cli.Command {
-	b := make([]cli.Command, 0, countAll(a))
-	for _, v := range a {
-		for _, i := range v {
-			b = append(b, i)
+		if v.Subcommands == nil {
+			b = append(b, v)
+		} else {
+			for _, i := range v.Subcommands {
+				i.Name = v.Name + ":" + i.Name
+				b = append(b, i)
+			}
 		}
 	}
 	return b

@@ -15,7 +15,7 @@ func PrintAppInfo() {
 
 var AppCommands = []cli.Command{
 	{
-		Name:  "app:config",
+		Name:  "config",
 		Usage: "Print config of app",
 		Action: func(c *cli.Context) {
 			PrintAppInfo()

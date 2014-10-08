@@ -111,7 +111,7 @@ var LoginCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "login:info",
+		Name:  "info",
 		Usage: "Print login info",
 		Action: func(c *cli.Context) {
 			res := &OAuth2Response{}

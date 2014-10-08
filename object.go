@@ -131,7 +131,7 @@ func CreateObjectAndPublishBody(bucketname, conttype string) {
 
 var ObjectCommands = []cli.Command{
 	{
-		Name:  "object:create",
+		Name:  "create",
 		Usage: "Create an object in application scope",
 		Args:  "<bucket-id>",
 		Action: func(c *cli.Context) {
@@ -140,7 +140,7 @@ var ObjectCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "object:read",
+		Name:  "read",
 		Usage: "Read the object in application scope",
 		Args:  "<bucket-id> <object-id>",
 		Flags: []cli.Flag{
@@ -153,7 +153,7 @@ var ObjectCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "object:query",
+		Name:  "query",
 		Usage: "Query objects in a bucket of application scope",
 		Args:  "<bucket-id>",
 		Action: func(c *cli.Context) {
@@ -162,7 +162,7 @@ var ObjectCommands = []cli.Command{
 		},
 	},
 	//{
-	//	Name:        "object:replace",
+	//	Name:        "replace",
 	//	Usage:       "Replate the object in application scope with a new one",
 	//	Description: "args: <bucket> <object-id>",
 	//	Action: func(c *cli.Context) {
@@ -171,7 +171,7 @@ var ObjectCommands = []cli.Command{
 	//	},
 	//},
 	{
-		Name:  "object:delete",
+		Name:  "delete",
 		Usage: "Delete the object in application scope",
 		Args:  "<bucket-id> <object-id>",
 		Action: func(c *cli.Context) {
@@ -181,7 +181,7 @@ var ObjectCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "object:body-attach",
+		Name:  "body-attach",
 		Usage: "Attach body to an object in application scope",
 		Args:  `<bucket-id> <object-id> <content-type>`,
 		Description: `
@@ -196,7 +196,7 @@ var ObjectCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "object:body-publish",
+		Name:  "body-publish",
 		Usage: "Publish a body of object in application scope",
 		Args:  `<bucket-id> <object-id>`,
 		Action: func(c *cli.Context) {
@@ -206,7 +206,7 @@ var ObjectCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "object:publish",
+		Name:  "publish",
 		Usage: "Publish a body creating a new object into the bucket in application scope",
 		Args:  `<bucket-id> <content-type>`,
 		Description: `

@@ -230,7 +230,7 @@ func getActiveVersion(c *cli.Context) string {
 
 var ServerCodeCommands = []cli.Command{
 	{
-		Name:  "servercode:list",
+		Name:  "list",
 		Usage: "List versions of server code",
 		Flags: []cli.Flag{
 			cli.BoolFlag{Name: "quite, q", Usage: "Print only versionID"},
@@ -241,7 +241,7 @@ var ServerCodeCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "servercode:deploy",
+		Name:  "deploy",
 		Usage: "Deploy a server code",
 		Args:  "<servercode-path>",
 		Flags: []cli.Flag{
@@ -257,7 +257,7 @@ var ServerCodeCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "servercode:get",
+		Name:  "get",
 		Usage: "Get specified server code",
 		Args:  "[version]",
 		Action: func(c *cli.Context) {
@@ -266,7 +266,7 @@ var ServerCodeCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "servercode:invoke",
+		Name:  "invoke",
 		Usage: "Invoke an entry point of server code",
 		Args:  "<entry-name> [version]",
 		Action: func(c *cli.Context) {
@@ -279,7 +279,7 @@ var ServerCodeCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "servercode:activate",
+		Name:  "activate",
 		Usage: "Activate a version",
 		Args:  "<version>",
 		Action: func(c *cli.Context) {
@@ -288,7 +288,7 @@ var ServerCodeCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "servercode:delete",
+		Name:  "delete",
 		Usage: "Delete a version of server code",
 		Args:  "<version>",
 		Action: func(c *cli.Context) {
@@ -297,7 +297,7 @@ var ServerCodeCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "servercode:hook-attach",
+		Name:  "hook-attach",
 		Usage: "Attach a hook config to current or specified server code",
 		Args:  "<hook-config-path> [version]",
 		Action: func(c *cli.Context) {
@@ -307,7 +307,7 @@ var ServerCodeCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "servercode:hook-get",
+		Name:  "hook-get",
 		Usage: "Get hook the config of current or specified server code",
 		Args:  "[version]",
 		Action: func(c *cli.Context) {
@@ -316,7 +316,7 @@ var ServerCodeCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "servercode:hook-delete",
+		Name:  "hook-delete",
 		Usage: "Delete the hook config of current specified server code",
 		Args:  "[version]",
 		Action: func(c *cli.Context) {
@@ -325,7 +325,7 @@ var ServerCodeCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "servercode:list-executions",
+		Name:  "list-executions",
 		Usage: "List executions for 7 days before",
 		Action: func(c *cli.Context) {
 			ListExecutions()
