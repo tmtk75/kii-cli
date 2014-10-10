@@ -1,6 +1,6 @@
 XC_ARCH=386 amd64
 XC_OS=linux darwin windows
-version=0.1.1
+version=`./kii-cli -v | sed 's/kii-cli version //g'`
 
 install:
 	go install

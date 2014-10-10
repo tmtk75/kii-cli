@@ -10,8 +10,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/codegangsta/cli"
 	"github.com/mitchellh/colorstring"
+	"github.com/tmtk75/cli"
 )
 
 func createObject(bucketname string, r io.Reader) map[string]interface{} {
@@ -131,36 +131,38 @@ func CreateObjectAndPublishBody(bucketname, conttype string) {
 
 var ObjectCommands = []cli.Command{
 	{
-		Name:  "object:create",
+		Name:  "create",
 		Usage: "Create an object in application scope",
+		Args:  "<bucket-id>",
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(1, c)
-			CreateObject(c.Args()[0])
+			bid, _ := c.ArgFor("bucket-id")
+			CreateObject(bid)
 		},
 	},
 	{
-		Name:        "object:read",
-		Usage:       "Read the object in application scope",
-		Description: "args: <bucket> <object-id>",
+		Name:  "read",
+		Usage: "Read the object in application scope",
+		Args:  "<bucket-id> <object-id>",
 		Flags: []cli.Flag{
 			cli.StringFlag{Name: "template", Value: "", Usage: "Template for output"},
 		},
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(2, c)
-			ReadObject(c.Args()[0], c.Args()[1], c.String("template"))
+			bid, _ := c.ArgFor("bucket-id")
+			oid, _ := c.ArgFor("object-id")
+			ReadObject(bid, oid, c.String("template"))
 		},
 	},
 	{
-		Name:        "object:query",
-		Usage:       "Query objects in a bucket of application scope",
-		Description: "args: <bucket>",
+		Name:  "query",
+		Usage: "Query objects in a bucket of application scope",
+		Args:  "<bucket-id>",
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(1, c)
-			QueryObject(c.Args()[0])
+			bid, _ := c.ArgFor("bucket-id")
+			QueryObject(bid)
 		},
 	},
 	//{
-	//	Name:        "object:replace",
+	//	Name:        "replace",
 	//	Usage:       "Replate the object in application scope with a new one",
 	//	Description: "args: <bucket> <object-id>",
 	//	Action: func(c *cli.Context) {
@@ -169,49 +171,54 @@ var ObjectCommands = []cli.Command{
 	//	},
 	//},
 	{
-		Name:        "object:delete",
-		Usage:       "Delete the object in application scope",
-		Description: "args: <bucket> <object-id>",
+		Name:  "delete",
+		Usage: "Delete the object in application scope",
+		Args:  "<bucket-id> <object-id>",
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(2, c)
-			DeleteObject(c.Args()[0], c.Args()[1])
+			bid, _ := c.ArgFor("bucket-id")
+			oid, _ := c.ArgFor("object-id")
+			DeleteObject(bid, oid)
 		},
 	},
 	{
-		Name:  "object:body-attach",
+		Name:  "body-attach",
 		Usage: "Attach body to an object in application scope",
-		Description: `args: <bucket> <object-id> <content-type>
-
+		Args:  `<bucket-id> <object-id> <content-type>`,
+		Description: `
    ex)
      dogs 4c8aaf60-3166-11e4-a448-12315004cc43 image/png < mydog.png
 `,
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(3, c)
-			AttachObjectBody(c.Args()[0], c.Args()[1], c.Args()[2])
+			bid, _ := c.ArgFor("bucket-id")
+			oid, _ := c.ArgFor("object-id")
+			ctype, _ := c.ArgFor("content-type")
+			AttachObjectBody(bid, oid, ctype)
 		},
 	},
 	{
-		Name:        "object:body-publish",
-		Usage:       "Publish a body of object in application scope",
-		Description: `args: <bucket> <object-id>`,
+		Name:  "body-publish",
+		Usage: "Publish a body of object in application scope",
+		Args:  `<bucket-id> <object-id>`,
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(2, c)
-			PublishObjectBody(c.Args()[0], c.Args()[1])
+			bid, _ := c.ArgFor("bucket-id")
+			oid, _ := c.ArgFor("object-id")
+			PublishObjectBody(bid, oid)
 		},
 	},
 	{
-		Name:  "object:publish",
+		Name:  "publish",
 		Usage: "Publish a body creating a new object into the bucket in application scope",
-		Description: `args: <bucket> <content-type>
-
+		Args:  `<bucket-id> <content-type>`,
+		Description: `
    Runs object:create, object-body-attach and object:body-publish in order.
    It's expected body is given thru stdin.
 
    ex)
      dogs image/png < mydog.png`,
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(2, c)
-			CreateObjectAndPublishBody(c.Args()[0], c.Args()[1])
+			bid, _ := c.ArgFor("bucket-id")
+			ctype, _ := c.ArgFor("content-type")
+			CreateObjectAndPublishBody(bid, ctype)
 		},
 	},
 }

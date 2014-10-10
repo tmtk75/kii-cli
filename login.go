@@ -8,7 +8,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/codegangsta/cli"
+	"github.com/tmtk75/cli"
 )
 
 type OAuth2Request struct {
@@ -111,7 +111,7 @@ var LoginCommands = []cli.Command{
 		},
 	},
 	{
-		Name:  "login:info",
+		Name:  "info",
 		Usage: "Print login info",
 		Action: func(c *cli.Context) {
 			res := &OAuth2Response{}

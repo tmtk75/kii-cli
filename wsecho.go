@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/codegangsta/cli"
+	"github.com/tmtk75/cli"
 
 	"code.google.com/p/go.net/websocket"
 )

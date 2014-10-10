@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/codegangsta/cli"
+	"github.com/tmtk75/cli"
 )
 
 func ListBucket() {
@@ -72,30 +72,32 @@ func DeleteAllBucketAcls(bucketname string) {
 
 var BucketCommands = []cli.Command{
 	{
-		Name:  "bucket:list",
+		Name:  "list",
 		Usage: "List buckets",
 		Action: func(c *cli.Context) {
 			ListBucket()
 		},
 	},
 	{
-		Name:  "bucket:read",
+		Name:  "read",
 		Usage: "Read a bucket",
+		Args:  "<bucket-id>",
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(1, c)
-			ReadBucket(c.Args()[0])
+			bid, _ := c.ArgFor("bucket-id")
+			ReadBucket(bid)
 		},
 	},
 	{
-		Name:  "bucket:delete",
+		Name:  "delete",
 		Usage: "Delete a bucket",
+		Args:  "<bucket-id>",
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(1, c)
-			DeleteBucket(c.Args()[0])
+			bid, _ := c.ArgFor("bucket-id")
+			DeleteBucket(bid)
 		},
 	},
 	{
-		Name:  "bucket:acl",
+		Name:  "acl",
 		Usage: "Edit bucket ACL",
 		Description: `Edit bucket ACL
 
@@ -113,33 +115,35 @@ var BucketCommands = []cli.Command{
 
 var cmds = []cli.Command{
 	{
-		Name:        "read",
-		Usage:       "Read a bucket ACL",
-		Description: "args: <bucket>",
+		Name:  "read",
+		Usage: "Read a bucket ACL",
+		Args:  "<bucket-id>",
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(1, c)
-			ReadBucketAcl(c.Args()[0])
+			bid, _ := c.ArgFor("bucket-id")
+			ReadBucketAcl(bid)
 		},
 	},
 	{
 		Name:  "delete",
 		Usage: "Delete a bucket ACL",
-		Description: `args: <bucket> <verb> <userID>
-
+		Args:  `<bucket-id> <verb> <user-id>`,
+		Description: `\
    ex)  my-bucket CREATE_OBJECTS_IN_BUCKET ANONYMOUS_USER
         my-bucket QUERY_OBJECTS_IN_BUCKET ANY_AUTHENTICATED_USER`,
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(3, c)
-			DeleteBucketAcl(c.Args()[0], c.Args()[1], c.Args()[2])
+			bid, _ := c.ArgFor("bucket-id")
+			verb, _ := c.ArgFor("verb")
+			uid, _ := c.ArgFor("user-id")
+			DeleteBucketAcl(bid, verb, uid)
 		},
 	},
 	{
-		Name:        "delete-all",
-		Usage:       "Delete all ACLs",
-		Description: "args: <bucket>",
+		Name:  "delete-all",
+		Usage: "Delete all ACLs",
+		Args:  "<bucket-id>",
 		Action: func(c *cli.Context) {
-			ShowCommandHelp(1, c)
-			DeleteAllBucketAcls(c.Args()[0])
+			bid, _ := c.ArgFor("bucket-id")
+			DeleteAllBucketAcls(bid)
 		},
 	},
 }
