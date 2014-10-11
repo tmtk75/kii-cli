@@ -73,7 +73,7 @@ func main() {
 	if os.Getenv("FLAT") != "" {
 		app.Commands = Flatten(app.Commands)
 	}
-	setupFlags(app)
+	SetupFlags(app)
 	app.Run(os.Args)
 }
 

@@ -145,7 +145,7 @@ func pickup(a ...string) string {
 
 const DEFAULT_PROFILE = "default"
 
-func setupFlags(app *cli.App) {
+func SetupFlags(app *cli.App) {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{Name: "app-id", Value: "", Usage: "AppID"},
 		cli.StringFlag{Name: "app-key", Value: "", Usage: "AppKey"},
