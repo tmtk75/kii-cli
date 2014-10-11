@@ -79,15 +79,17 @@ func (self *OAuth2Response) Decode(res *HttpResponse) *OAuth2Response {
 }
 
 func retrieveAppAdminAccessToken() *OAuth2Response {
-	token := globalConfig.OAuth2Request()
-	headers := globalConfig.HttpHeaders("application/json")
+	p := Profile()
+	token := p.OAuth2Request()
+	headers := p.HttpHeaders("application/json")
 	res := HttpPostJson("/oauth2/token", headers, token)
 	oauth2res := &OAuth2Response{}
 	return oauth2res.Decode(res)
 }
 
 func adminTokenFilePath() string {
-	return metaFilePath(path.Join(".", globalConfig.AppId), "token")
+	p := Profile()
+	return metaFilePath(path.Join(".", p.AppId), "token")
 }
 
 func LoginAsAppAdmin(force bool) {

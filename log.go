@@ -67,14 +67,15 @@ func (self *GlobalConfig) AuthRequest() *AuthRequest {
 }
 
 func StartLogging() {
-	req := globalConfig.AuthRequest()
+	p := Profile()
+	req := p.AuthRequest()
 	j, err := json.Marshal(req)
 	if err != nil {
 		panic(err)
 	}
 	//fmt.Printf("%s", string(j))
 
-	url := globalConfig.EndpointUrlForApiLog()
+	url := p.EndpointUrlForApiLog()
 	logger.Printf("log-url: %s", url)
 	logger.Printf("%s", j)
 	ws, err := websocket.Dial(url, "", "http://localhost/")

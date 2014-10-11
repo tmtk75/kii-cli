@@ -24,8 +24,9 @@ func DeployServerCode(serverCodePath string, activate bool) string {
 	if err != nil {
 		panic(err)
 	}
-	path := fmt.Sprintf("/apps/%s/server-code", globalConfig.AppId)
-	headers := globalConfig.HttpHeadersWithAuthorization("application/javascript")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/server-code", p.AppId)
+	headers := p.HttpHeadersWithAuthorization("application/javascript")
 	b := HttpPost(path, headers, bytes.NewReader(code)).Bytes()
 	var ver map[string]string
 	json.Unmarshal(b, &ver)
@@ -44,8 +45,9 @@ func OptionalReader(f func() io.Reader) io.Reader {
 }
 
 func InvokeServerCode(entryName string, version string) {
-	path := fmt.Sprintf("/apps/%s/server-code/versions/%s/%s", globalConfig.AppId, version, entryName)
-	headers := globalConfig.HttpHeadersWithAuthorization("application/json")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/server-code/versions/%s/%s", p.AppId, version, entryName)
+	headers := p.HttpHeadersWithAuthorization("application/json")
 	r := OptionalReader(func() io.Reader { return strings.NewReader("{}") })
 	b := HttpPost(path, headers, r).Bytes()
 	fmt.Printf("%s\n", string(b))
@@ -98,8 +100,9 @@ func ListServerCode(quite bool, active bool) {
 }
 
 func ListVersions() *Versions {
-	path := fmt.Sprintf("/apps/%s/server-code/versions", globalConfig.AppId)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/server-code/versions", p.AppId)
+	headers := p.HttpHeadersWithAuthorization("")
 	b := HttpGet(path, headers).Bytes()
 	vers := Versions{}
 	err := json.Unmarshal(b, &vers)
@@ -126,21 +129,24 @@ func PrintVersions(vers *Versions, quite bool, active bool) {
 }
 
 func GetServerCode(version string) {
-	path := fmt.Sprintf("/apps/%s/server-code/versions/%s", globalConfig.AppId, version)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/server-code/versions/%s", p.AppId, version)
+	headers := p.HttpHeadersWithAuthorization("")
 	b := HttpGet(path, headers).Bytes()
 	fmt.Printf("%s\n", string(b))
 }
 
 func ActivateServerCode(version string) {
-	path := fmt.Sprintf("/apps/%s/server-code/versions/current", globalConfig.AppId)
-	headers := globalConfig.HttpHeadersWithAuthorization("text/plain")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/server-code/versions/current", p.AppId)
+	headers := p.HttpHeadersWithAuthorization("text/plain")
 	HttpPut(path, headers, strings.NewReader(version)).Bytes()
 }
 
 func DeleteServerCode(version string) {
-	path := fmt.Sprintf("/apps/%s/server-code/versions/%s", globalConfig.AppId, version)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/server-code/versions/%s", p.AppId, version)
+	headers := p.HttpHeadersWithAuthorization("")
 	b := HttpDelete(path, headers).Bytes()
 	fmt.Printf("%s\n", string(b))
 }
@@ -150,23 +156,26 @@ func AttachHookConfig(hookConfigPath, version string) {
 	if err != nil {
 		panic(err)
 	}
-	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", globalConfig.AppId, version)
-	headers := globalConfig.HttpHeadersWithAuthorization("application/vnd.kii.HooksDeploymentRequest+json")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", p.AppId, version)
+	headers := p.HttpHeadersWithAuthorization("application/vnd.kii.HooksDeploymentRequest+json")
 	b := HttpPut(path, headers, bytes.NewReader(code)).Bytes()
 	var ver map[string]interface{}
 	json.Unmarshal(b, &ver)
 }
 
 func GetHookConfig(version string) {
-	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", globalConfig.AppId, version)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", p.AppId, version)
+	headers := p.HttpHeadersWithAuthorization("")
 	b := HttpGet(path, headers).Bytes()
 	fmt.Printf("%s\n", string(b))
 }
 
 func DeleteHookConfig(version string) {
-	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", globalConfig.AppId, version)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", p.AppId, version)
+	headers := p.HttpHeadersWithAuthorization("")
 	b := HttpDelete(path, headers).Bytes()
 	fmt.Printf("%s\n", string(b))
 }
@@ -185,8 +194,9 @@ type ExecutionResult struct {
 func ListExecutions() {
 	now := time.Now().Unix() * 1000
 	dayBefore1week := now - 60*60*24*7*1000 // in millisecond
-	path := fmt.Sprintf("/apps/%s/hooks/executions/query", globalConfig.AppId)
-	headers := globalConfig.HttpHeadersWithAuthorization("application/vnd.kii.ScheduleExecutionQueryRequest+json")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/hooks/executions/query", p.AppId)
+	headers := p.HttpHeadersWithAuthorization("application/vnd.kii.ScheduleExecutionQueryRequest+json")
 	q := fmt.Sprintf(`{
 		             "scheduleExecutionQuery": {
 		               "clause": {

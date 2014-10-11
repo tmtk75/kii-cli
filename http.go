@@ -42,7 +42,8 @@ func HttpDelete(path string, headers Headers) *HttpResponse {
 }
 
 func httpRequest(method string, path string, headers Headers, r io.Reader) *HttpResponse {
-	ep := fmt.Sprintf("%s%s", globalConfig.EndpointUrl(), path)
+	p := Profile()
+	ep := fmt.Sprintf("%s%s", p.EndpointUrl(), path)
 	logger.Printf("%s %s", method, ep)
 
 	body, _ := ioutil.ReadAll(r)
@@ -55,7 +56,7 @@ func httpRequest(method string, path string, headers Headers, r io.Reader) *Http
 		logger.Printf("%s: %s\n", k, v)
 	}
 
-	if globalConfig.Curl {
+	if p.Curl {
 		printCurlString(method, headers, ep, body)
 	}
 
@@ -80,7 +81,8 @@ func printCurlString(method string, header Headers, endpoint string, body []byte
 	h := strings.Join(hs, " ")
 
 	// ~/.kii/${app_id}/curl.{something}
-	dataDir := fmt.Sprintf("%v", metaFilePath(globalConfig.AppId, ""))
+	p := Profile()
+	dataDir := fmt.Sprintf("%v", metaFilePath(p.AppId, ""))
 	tmp, err := ioutil.TempFile(dataDir, "curl-data.")
 	if err != nil {
 		panic(err)

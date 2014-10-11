@@ -33,7 +33,8 @@ func (self *GlobalConfig) EndpointUrl() string {
 		"cn": "api-cn2.kii.com",
 		"sg": "api-sg.kii.com",
 	}
-	host := hosts[globalConfig.Site]
+	p := Profile()
+	host := hosts[p.Site]
 	if host == "" {
 		print("missing site, use --site or set KII_SITE\n")
 		os.Exit(ExitMissingParams)
@@ -51,7 +52,8 @@ func (self *GlobalConfig) EndpointUrlForApiLog() string {
 		"cn": "apilog-cn2.kii.com",
 		"sg": "apilog-sg.kii.com",
 	}
-	host := hosts[globalConfig.Site]
+	p := Profile()
+	host := hosts[p.Site]
 	if host == "" {
 		print("missing site, use --site or set KII_SITE\n")
 		os.Exit(ExitMissingParams)
@@ -60,9 +62,10 @@ func (self *GlobalConfig) EndpointUrlForApiLog() string {
 }
 
 func (self *GlobalConfig) HttpHeaders(contentType string) map[string]string {
+	p := Profile()
 	m := map[string]string{
-		"x-kii-appid":  globalConfig.AppId,
-		"x-kii-appkey": globalConfig.AppKey,
+		"x-kii-appid":  p.AppId,
+		"x-kii-appkey": p.AppKey,
 	}
 	if len(contentType) > 0 {
 		m["content-type"] = contentType

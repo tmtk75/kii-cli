@@ -7,8 +7,9 @@ import (
 )
 
 func PrintAppInfo() {
-	path := fmt.Sprintf("/apps/%s/", globalConfig.AppId)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/", p.AppId)
+	headers := p.HttpHeadersWithAuthorization("")
 	body := HttpGet(path, headers).Bytes()
 	fmt.Printf("%s\n", string(body))
 }
