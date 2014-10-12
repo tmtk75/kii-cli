@@ -6,3 +6,7 @@ import (
 )
 
 var logger = log.New(ioutil.Discard, "", log.LstdFlags)
+
+func Logger() *log.Logger {
+	return logger
+}
