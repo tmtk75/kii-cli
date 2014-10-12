@@ -13,25 +13,11 @@ const (
 	ExitMissingParams       = 4
 )
 
-func ShowCommandHelp(argsLen int, c *cli.Context) {
-	if len(c.Args()) != argsLen {
-		cli.ShowCommandHelp(c, c.Command.Name)
-		os.Exit(ExitIllegalNumberOfArgs)
-	}
-}
-
-type pair struct {
-	prefix   cli.Command
-	commands []cli.Command
-}
-
-var commands = []pair{}
-
 func Main() {
 	app := cli.NewApp()
 	app.Name = "kii-cli"
 	app.Usage = "KiiCloud command line interface"
-	app.Version = "0.1.2"
+	app.Version = "0.1.3"
 	app.Commands = []cli.Command{
 		cli.Command{
 			Name:        "auth",
