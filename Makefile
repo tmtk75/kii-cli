@@ -42,7 +42,7 @@ clean:
 	rm -f pkg/*.gz pkg/*.zip
 
 distclean:
-	rm -rf pkg
+	rm -rf kii-cli pkg
 
 setup:
 	go get -u github.com/mitchellh/gox

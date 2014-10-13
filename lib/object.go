@@ -1,4 +1,4 @@
-package main
+package kiicli
 
 import (
 	"bytes"
@@ -15,8 +15,9 @@ import (
 )
 
 func createObject(bucketname string, r io.Reader) map[string]interface{} {
-	path := fmt.Sprintf("/apps/%s/buckets/%s/objects", globalConfig.AppId, bucketname)
-	headers := globalConfig.HttpHeadersWithAuthorization("application/json")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/buckets/%s/objects", p.AppId, bucketname)
+	headers := p.HttpHeadersWithAuthorization("application/json")
 	body := HttpPost(path, headers, r).Bytes()
 	var j map[string]interface{}
 	json.Unmarshal(body, &j)
@@ -39,8 +40,9 @@ func ReadObject(bucketname, objectId, templstr string) {
 		templ = t
 	}
 
-	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%s", globalConfig.AppId, bucketname, objectId)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%s", p.AppId, bucketname, objectId)
+	headers := p.HttpHeadersWithAuthorization("")
 	body := HttpGet(path, headers).Bytes()
 
 	if templ == nil {
@@ -53,8 +55,9 @@ func ReadObject(bucketname, objectId, templstr string) {
 }
 
 func QueryObject(bucketname string) {
-	path := fmt.Sprintf("/apps/%s/buckets/%s/query", globalConfig.AppId, bucketname)
-	headers := globalConfig.HttpHeadersWithAuthorization("application/vnd.kii.QueryRequest+json")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/buckets/%s/query", p.AppId, bucketname)
+	headers := p.HttpHeadersWithAuthorization("application/vnd.kii.QueryRequest+json")
 	r := OptionalReader(func() io.Reader { return strings.NewReader(`{"bucketQuery":{"clause":{"type":"all"}}}`) })
 	body := HttpPost(path, headers, r).Bytes()
 
@@ -62,8 +65,9 @@ func QueryObject(bucketname string) {
 }
 
 func ReplaceObject(bucketname string) {
-	path := fmt.Sprintf("/apps/%s/buckets/%s/objects", globalConfig.AppId, bucketname)
-	headers := globalConfig.HttpHeadersWithAuthorization("application/json")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/buckets/%s/objects", p.AppId, bucketname)
+	headers := p.HttpHeadersWithAuthorization("application/json")
 	r := OptionalReader(func() io.Reader { return strings.NewReader("{}") })
 	body := HttpPut(path, headers, r).Bytes()
 
@@ -73,15 +77,17 @@ func ReplaceObject(bucketname string) {
 }
 
 func DeleteObject(bucketname, objectId string) {
-	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%s", globalConfig.AppId, bucketname, objectId)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%s", p.AppId, bucketname, objectId)
+	headers := p.HttpHeadersWithAuthorization("")
 	body := HttpDelete(path, headers).Bytes()
 	fmt.Printf("%s\n", string(body))
 }
 
 func attachObjectBody(bucketname, objectId, conttype string) []byte {
-	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%v/body", globalConfig.AppId, bucketname, objectId)
-	headers := globalConfig.HttpHeadersWithAuthorization(conttype)
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%v/body", p.AppId, bucketname, objectId)
+	headers := p.HttpHeadersWithAuthorization(conttype)
 	r := OptionalReader(func() io.Reader {
 		log.Fatalf(colorstring.Color("[red]object body must be given thru stdin"))
 		return nil
@@ -95,8 +101,9 @@ func AttachObjectBody(bucketname, objectId, conttype string) {
 }
 
 func publishObjectBody(bucketname, objectId string) []byte {
-	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%v/body/publish", globalConfig.AppId, bucketname, objectId)
-	headers := globalConfig.HttpHeadersWithAuthorization("application/vnd.kii.ObjectBodyPublicationRequest+json")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%v/body/publish", p.AppId, bucketname, objectId)
+	headers := p.HttpHeadersWithAuthorization("application/vnd.kii.ObjectBodyPublicationRequest+json")
 	req := map[string]int64{"expiresIn": 60 * 3 /*sec*/}
 	j, _ := json.Marshal(req)
 	return HttpPost(path, headers, bytes.NewReader(j)).Bytes()

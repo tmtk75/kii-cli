@@ -1,4 +1,4 @@
-package main
+package kiicli
 
 import (
 	"bytes"
@@ -42,7 +42,8 @@ func HttpDelete(path string, headers Headers) *HttpResponse {
 }
 
 func httpRequest(method string, path string, headers Headers, r io.Reader) *HttpResponse {
-	ep := fmt.Sprintf("%s%s", globalConfig.EndpointUrl(), path)
+	p := Profile()
+	ep := fmt.Sprintf("%s%s", p.EndpointUrl(), path)
 	logger.Printf("%s %s", method, ep)
 
 	body, _ := ioutil.ReadAll(r)
@@ -52,10 +53,10 @@ func httpRequest(method string, path string, headers Headers, r io.Reader) *Http
 	}
 	for k, v := range headers {
 		req.Header.Add(k, v)
-		logger.Printf("%s: %s\n", k, v)
+		logger.Printf("%s: %s", k, v)
 	}
 
-	if globalConfig.Curl {
+	if p.Curl {
 		printCurlString(method, headers, ep, body)
 	}
 
@@ -64,9 +65,10 @@ func httpRequest(method string, path string, headers Headers, r io.Reader) *Http
 	if err != nil {
 		panic(err)
 	}
+	logger.Printf("status-code: %v", res.StatusCode)
 	if res.StatusCode/100 != 2 {
 		b, _ := ioutil.ReadAll(res.Body)
-		log.Fatalf("%s\n", string(b))
+		log.Fatalf("%s", string(b))
 	}
 	hr := HttpResponse(*res)
 	return &hr
@@ -80,7 +82,8 @@ func printCurlString(method string, header Headers, endpoint string, body []byte
 	h := strings.Join(hs, " ")
 
 	// ~/.kii/${app_id}/curl.{something}
-	dataDir := fmt.Sprintf("%v", metaFilePath(globalConfig.AppId, ""))
+	p := Profile()
+	dataDir := fmt.Sprintf("%v", metaFilePath(p.AppId, ""))
 	tmp, err := ioutil.TempFile(dataDir, "curl-data.")
 	if err != nil {
 		panic(err)

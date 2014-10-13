@@ -1,4 +1,4 @@
-package main
+package kiicli
 
 import (
 	"io/ioutil"
@@ -6,3 +6,7 @@ import (
 )
 
 var logger = log.New(ioutil.Discard, "", log.LstdFlags)
+
+func Logger() *log.Logger {
+	return logger
+}

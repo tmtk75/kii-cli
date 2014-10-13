@@ -1,4 +1,4 @@
-package main
+package kiicli
 
 import (
 	"encoding/json"
@@ -9,8 +9,9 @@ import (
 )
 
 func ListBucket() {
-	path := fmt.Sprintf("/apps/%s/buckets", globalConfig.AppId)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/buckets", p.AppId)
+	headers := p.HttpHeadersWithAuthorization("")
 	body := HttpGet(path, headers).Bytes()
 
 	var v map[string][]interface{}
@@ -21,21 +22,24 @@ func ListBucket() {
 }
 
 func ReadBucket(bucketname string) {
-	path := fmt.Sprintf("/apps/%s/buckets/%s", globalConfig.AppId, bucketname)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/buckets/%s", p.AppId, bucketname)
+	headers := p.HttpHeadersWithAuthorization("")
 	body := HttpGet(path, headers).Bytes()
 	fmt.Println(string(body))
 }
 
 func DeleteBucket(name string) {
-	path := fmt.Sprintf("/apps/%s/buckets/%v", globalConfig.AppId, name)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/buckets/%v", p.AppId, name)
+	headers := p.HttpHeadersWithAuthorization("")
 	HttpDelete(path, headers).Bytes()
 }
 
 func readBucketAcl(bucketname string) []byte {
-	path := fmt.Sprintf("/apps/%s/buckets/%s/acl", globalConfig.AppId, bucketname)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/buckets/%s/acl", p.AppId, bucketname)
+	headers := p.HttpHeadersWithAuthorization("")
 	body := HttpGet(path, headers).Bytes()
 	return body
 }
@@ -46,9 +50,10 @@ func ReadBucketAcl(bucketname string) {
 }
 
 func DeleteBucketAcl(bucketname, verb, userId string) {
+	p := Profile()
 	// /apps/%s/buckets/%s/acl/QUERY_OBJECTS_IN_BUCKET/UserID:ANONYMOUS_USER
-	path := fmt.Sprintf("/apps/%s/buckets/%s/acl/%v/UserID:%v", globalConfig.AppId, bucketname, verb, userId)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	path := fmt.Sprintf("/apps/%s/buckets/%s/acl/%v/UserID:%v", p.AppId, bucketname, verb, userId)
+	headers := p.HttpHeadersWithAuthorization("")
 	body := HttpDelete(path, headers).Bytes()
 	fmt.Println(string(body))
 }

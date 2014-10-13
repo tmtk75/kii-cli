@@ -1,4 +1,4 @@
-package main
+package kiicli
 
 import (
 	"fmt"
@@ -16,8 +16,9 @@ type UserCreationRequest struct {
 }
 
 func CreateUser(loginname string, password string) {
-	path := fmt.Sprintf("/apps/%s/users", globalConfig.AppId)
-	headers := globalConfig.HttpHeaders("application/json")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/users", p.AppId)
+	headers := p.HttpHeaders("application/json")
 	req := &UserCreationRequest{loginname, password}
 	res := HttpPostJson(path, headers, req)
 	defer res.Body.Close()
@@ -25,14 +26,15 @@ func CreateUser(loginname string, password string) {
 }
 
 func LoginAsUser(username string, password string) {
-	dir := path.Join(globalConfig.AppId, username)
+	p := Profile()
+	dir := path.Join(p.AppId, username)
 	tokenPath := metaFilePath(dir, "token")
 
 	oauth2res := &OAuth2Response{}
 	if b, _ := exists(tokenPath); b {
 		oauth2res.LoadFrom(tokenPath)
 	} else {
-		headers := globalConfig.HttpHeaders("application/json")
+		headers := p.HttpHeaders("application/json")
 		req := map[string]string{"username": username, "password": password}
 		res := HttpPostJson("/oauth2/token", headers, req)
 		oauth2res.Decode(res)
@@ -43,23 +45,26 @@ func LoginAsUser(username string, password string) {
 }
 
 func ReadUser(userId string) {
-	path := fmt.Sprintf("/apps/%s/users/%v", globalConfig.AppId, userId)
-	headers := globalConfig.HttpHeadersWithAuthorization("application/json")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/users/%v", p.AppId, userId)
+	headers := p.HttpHeadersWithAuthorization("application/json")
 	b := HttpGet(path, headers).Bytes()
 	fmt.Println(string(b))
 }
 
 func ListUsers() {
-	path := fmt.Sprintf("/apps/%s/users/query", globalConfig.AppId)
-	headers := globalConfig.HttpHeadersWithAuthorization("application/vnd.kii.userqueryrequest+json")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/users/query", p.AppId)
+	headers := p.HttpHeadersWithAuthorization("application/vnd.kii.userqueryrequest+json")
 	body := strings.NewReader(`{"userQuery":{"clause":{"type":"all"}}}`)
 	b := HttpPost(path, headers, body).Bytes()
 	fmt.Println(string(b))
 }
 
 func DeleteUser(userId string) {
-	path := fmt.Sprintf("/apps/%s/users/%v", globalConfig.AppId, userId)
-	headers := globalConfig.HttpHeadersWithAuthorization("")
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/users/%v", p.AppId, userId)
+	headers := p.HttpHeadersWithAuthorization("")
 	b := HttpDelete(path, headers).Bytes()
 	fmt.Println(string(b))
 }
