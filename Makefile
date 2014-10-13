@@ -6,17 +6,12 @@ install:
 	go install
 
 ## GITHUB_TOKEN is needed
-release:
+release: ./kii-cli
 	rm -f pkg/*.exe pkg/*_amd64 pkg/*_386*
 	ghr -u tmtk75 v$(version) pkg
 
-bitray_dl:
-	curl -v -OL http://dl.bintray.com/tmtk75/generic/$(version)_kii-cli_darwin_amd64.gz
-
-bitray_release: pkg/kii-cli_linux_amd64.gz
-	curl -T $< \
-		-utmtk75:$(API_KEY) \
-		https://api.bintray.com/content/tmtk75/generic/kii-cli/v1/$(version)_kii-cli_darwin_amd64.gz
+./kii-cli:
+	go build
 
 hash:
 	shasum -a1 pkg/*_amd64.{gz,zip}
