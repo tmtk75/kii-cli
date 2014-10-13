@@ -53,7 +53,7 @@ func httpRequest(method string, path string, headers Headers, r io.Reader) *Http
 	}
 	for k, v := range headers {
 		req.Header.Add(k, v)
-		logger.Printf("%s: %s\n", k, v)
+		logger.Printf("%s: %s", k, v)
 	}
 
 	if p.Curl {
@@ -68,7 +68,7 @@ func httpRequest(method string, path string, headers Headers, r io.Reader) *Http
 	logger.Printf("status-code: %v", res.StatusCode)
 	if res.StatusCode/100 != 2 {
 		b, _ := ioutil.ReadAll(res.Body)
-		log.Fatalf("%s\n", string(b))
+		log.Fatalf("%s", string(b))
 	}
 	hr := HttpResponse(*res)
 	return &hr
