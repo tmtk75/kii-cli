@@ -12,6 +12,7 @@ import (
 
 	"github.com/mitchellh/colorstring"
 	"github.com/tmtk75/cli"
+	goext "github.com/tmtk75/go-ext"
 )
 
 func createObject(bucketname string, r io.Reader) map[string]interface{} {
@@ -25,7 +26,7 @@ func createObject(bucketname string, r io.Reader) map[string]interface{} {
 }
 
 func CreateObject(bucketname string) {
-	r := OptionalReader(func() io.Reader { return strings.NewReader("{}") })
+	r := goext.OptionalReader(func() io.Reader { return strings.NewReader("{}") })
 	j := createObject(bucketname, r)
 	fmt.Printf("%s\n", j["objectID"])
 }
@@ -58,7 +59,7 @@ func QueryObject(bucketname string) {
 	p := Profile()
 	path := fmt.Sprintf("/apps/%s/buckets/%s/query", p.AppId, bucketname)
 	headers := p.HttpHeadersWithAuthorization("application/vnd.kii.QueryRequest+json")
-	r := OptionalReader(func() io.Reader { return strings.NewReader(`{"bucketQuery":{"clause":{"type":"all"}}}`) })
+	r := goext.OptionalReader(func() io.Reader { return strings.NewReader(`{"bucketQuery":{"clause":{"type":"all"}}}`) })
 	body := HttpPost(path, headers, r).Bytes()
 
 	fmt.Printf("%s\n", string(body))
@@ -68,7 +69,7 @@ func ReplaceObject(bucketname string) {
 	p := Profile()
 	path := fmt.Sprintf("/apps/%s/buckets/%s/objects", p.AppId, bucketname)
 	headers := p.HttpHeadersWithAuthorization("application/json")
-	r := OptionalReader(func() io.Reader { return strings.NewReader("{}") })
+	r := goext.OptionalReader(func() io.Reader { return strings.NewReader("{}") })
 	body := HttpPut(path, headers, r).Bytes()
 
 	var j map[string]interface{}
@@ -88,7 +89,7 @@ func attachObjectBody(bucketname, objectId, conttype string) []byte {
 	p := Profile()
 	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%v/body", p.AppId, bucketname, objectId)
 	headers := p.HttpHeadersWithAuthorization(conttype)
-	r := OptionalReader(func() io.Reader {
+	r := goext.OptionalReader(func() io.Reader {
 		log.Fatalf(colorstring.Color("[red]object body must be given thru stdin"))
 		return nil
 	})

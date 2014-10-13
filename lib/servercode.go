@@ -7,14 +7,12 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"os"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/tmtk75/cli"
-
-	"code.google.com/p/go.crypto/ssh/terminal"
+	goext "github.com/tmtk75/go-ext"
 )
 
 type Headers map[string]string
@@ -37,18 +35,11 @@ func DeployServerCode(serverCodePath string, activate bool) string {
 	return ver["versionID"]
 }
 
-func OptionalReader(f func() io.Reader) io.Reader {
-	if terminal.IsTerminal(int(os.Stdin.Fd())) {
-		return f()
-	}
-	return os.Stdin
-}
-
 func InvokeServerCode(entryName string, version string) {
 	p := Profile()
 	path := fmt.Sprintf("/apps/%s/server-code/versions/%s/%s", p.AppId, version, entryName)
 	headers := p.HttpHeadersWithAuthorization("application/json")
-	r := OptionalReader(func() io.Reader { return strings.NewReader("{}") })
+	r := goext.OptionalReader(func() io.Reader { return strings.NewReader("{}") })
 	b := HttpPost(path, headers, r).Bytes()
 	fmt.Printf("%s\n", string(b))
 }
