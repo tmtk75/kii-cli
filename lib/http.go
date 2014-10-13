@@ -65,6 +65,7 @@ func httpRequest(method string, path string, headers Headers, r io.Reader) *Http
 	if err != nil {
 		panic(err)
 	}
+	logger.Printf("status-code: %v", res.StatusCode)
 	if res.StatusCode/100 != 2 {
 		b, _ := ioutil.ReadAll(res.Body)
 		log.Fatalf("%s\n", string(b))
