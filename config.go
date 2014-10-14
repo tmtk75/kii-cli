@@ -23,6 +23,13 @@ type GlobalConfig struct {
 	Curl         bool
 }
 
+const (
+	ExitGeneralReason       = 1
+	ExitIllegalNumberOfArgs = 2
+	ExitNotLoggedIn         = 3
+	ExitMissingParams       = 4
+)
+
 func (self *GlobalConfig) EndpointUrl() string {
 	if self.endpointUrl != "" {
 		return self.endpointUrl
@@ -206,4 +213,19 @@ func SetupFlags(app *cli.App) {
 
 		return nil
 	}
+}
+
+func Flatten(a []cli.Command) []cli.Command {
+	b := make([]cli.Command, 0, 16)
+	for _, v := range a {
+		if v.Subcommands == nil {
+			b = append(b, v)
+		} else {
+			for _, i := range v.Subcommands {
+				i.Name = v.Name + ":" + i.Name
+				b = append(b, i)
+			}
+		}
+	}
+	return b
 }
