@@ -31,7 +31,8 @@ build: clean
 	gox \
 	  -os="$(XC_OS)" \
 	  -arch="$(XC_ARCH)" \
-	  -output "pkg/{{.Dir}}_{{.OS}}_{{.Arch}}"
+	  -output "pkg/{{.Dir}}_{{.OS}}_{{.Arch}}" \
+	  ./cmd/kii-cli
 
 clean:
 	rm -f pkg/*.gz pkg/*.zip
