@@ -23,6 +23,13 @@ type GlobalConfig struct {
 	Curl         bool
 }
 
+const (
+	ExitGeneralReason       = 1
+	ExitIllegalNumberOfArgs = 2
+	ExitNotLoggedIn         = 3
+	ExitMissingParams       = 4
+)
+
 func (self *GlobalConfig) EndpointUrl() string {
 	if self.endpointUrl != "" {
 		return self.endpointUrl
