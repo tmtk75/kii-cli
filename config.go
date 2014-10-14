@@ -214,3 +214,18 @@ func SetupFlags(app *cli.App) {
 		return nil
 	}
 }
+
+func Flatten(a []cli.Command) []cli.Command {
+	b := make([]cli.Command, 0, 16)
+	for _, v := range a {
+		if v.Subcommands == nil {
+			b = append(b, v)
+		} else {
+			for _, i := range v.Subcommands {
+				i.Name = v.Name + ":" + i.Name
+				b = append(b, i)
+			}
+		}
+	}
+	return b
+}
