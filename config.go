@@ -100,11 +100,18 @@ func exists(path string) (bool, error) {
 
 // Return ~/.kii/${filename}
 func metaFilePath(dir string, filename string) string {
+	d := DirPath([]string{dir})
+	return d.MetaFilePath(filename)
+}
+
+type DirPath []string
+
+func (dir DirPath) MetaFilePath(filename string) string {
 	homedir, err := homedir.Dir()
 	if err != nil {
 		panic(err)
 	}
-	confdirpath := path.Join(homedir, ".kii", dir)
+	confdirpath := path.Join(homedir, ".kii", path.Join(dir...))
 	err = os.MkdirAll(confdirpath, os.ModeDir|0700)
 	if err != nil {
 		panic(err)
