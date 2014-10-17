@@ -21,6 +21,7 @@ type GlobalConfig struct {
 	endpointUrl  string
 	devlogUrl    string
 	Curl         bool
+	SuppressExit bool
 }
 
 const (
@@ -173,6 +174,7 @@ func SetupFlags(app *cli.App) {
 		cli.BoolFlag{Name: "verbose", Usage: "Verbosely"},
 		cli.StringFlag{Name: "profile", Value: DEFAULT_PROFILE, Usage: "Profile name for ~/.kii/config"},
 		cli.BoolFlag{Name: "curl", Usage: "Print curl command saving body as a tmp file if body exists"},
+		cli.BoolFlag{Name: "suppress-exit", Usage: "Suppress exit with 1 when receiving status code other than 2xx"},
 	}
 
 	app.Before = func(c *cli.Context) error {
@@ -216,6 +218,7 @@ func SetupFlags(app *cli.App) {
 			endpointUrl:  getConf("endpoint-url", "KII_ENDPOINT_URL", "endpoint_url"),
 			devlogUrl:    getConf("log-url", "KII_LOG_URL", "log_url"),
 			Curl:         c.GlobalBool("curl"),
+			SuppressExit: c.GlobalBool("suppress-exit"),
 		}
 
 		return nil
