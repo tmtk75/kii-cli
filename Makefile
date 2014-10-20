@@ -3,7 +3,7 @@ XC_OS=linux darwin windows
 version=`./kii-cli -v | sed 's/kii-cli version //g'`
 
 install:
-	go install
+	go install ./cmd/kii-cli
 
 ## GITHUB_TOKEN is needed
 release: ./kii-cli

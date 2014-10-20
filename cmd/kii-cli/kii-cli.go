@@ -51,7 +51,7 @@ func main() {
 		},
 		cli.Command{
 			Name:        "profile",
-			Usage:       "",
+			Usage:       "Profile management",
 			Subcommands: kiicli.ProfileCommands,
 		},
 	}

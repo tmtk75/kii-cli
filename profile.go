@@ -12,7 +12,8 @@ func Profile() *GlobalConfig {
 
 var ProfileCommands = []cli.Command{
 	cli.Command{
-		Name: "ls",
+		Name:  "ls",
+		Usage: "List profiles in your config",
 		Action: func(c *cli.Context) {
 			file, _ := loadIniFile()
 			for _, s := range *file {
