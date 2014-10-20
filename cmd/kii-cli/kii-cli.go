@@ -49,6 +49,11 @@ func main() {
 			Usage:       "Development support",
 			Subcommands: kiicli.WSEchoCommands,
 		},
+		cli.Command{
+			Name:        "profile",
+			Usage:       "",
+			Subcommands: kiicli.ProfileCommands,
+		},
 	}
 	if os.Getenv("FLAT") != "" {
 		app.Commands = kiicli.Flatten(app.Commands)
