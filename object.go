@@ -85,19 +85,15 @@ func DeleteObject(bucketname, objectId string) {
 	fmt.Printf("%s\n", string(body))
 }
 
-func attachObjectBody(bucketname, objectId, conttype string) []byte {
+func attachObjectBody(bucketname, objectId, conttype string, r io.Reader) []byte {
 	p := Profile()
 	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%v/body", p.AppId, bucketname, objectId)
 	headers := p.HttpHeadersWithAuthorization(conttype)
-	r := goext.OptionalReader(func() io.Reader {
-		log.Fatalf(colorstring.Color("[red]object body must be given thru stdin"))
-		return nil
-	})
 	return HttpPut(path, headers, r).Bytes()
 }
 
-func AttachObjectBody(bucketname, objectId, conttype string) {
-	body := attachObjectBody(bucketname, objectId, conttype)
+func AttachObjectBody(bucketname, objectId, conttype string, r io.Reader) {
+	body := attachObjectBody(bucketname, objectId, conttype, r)
 	fmt.Printf("%v", string(body))
 }
 
@@ -115,12 +111,12 @@ func PublishObjectBody(bucketname, objectId string) {
 	fmt.Printf("%v", string(body))
 }
 
-func CreateObjectAndPublishBody(bucketname, conttype string) {
+func CreateObjectAndPublishBody(bucketname, conttype string, br io.Reader) {
 	r := strings.NewReader("{}")
 	j := createObject(bucketname, r)
 	objId := j["objectID"].(string)
 
-	r0 := attachObjectBody(bucketname, objId, conttype)
+	r0 := attachObjectBody(bucketname, objId, conttype, br)
 	var a map[string]int64
 	json.Unmarshal(r0, &a)
 	logger.Printf("modifiedAt: %v", a["modifiedAt"])
@@ -200,7 +196,7 @@ var ObjectCommands = []cli.Command{
 			bid, _ := c.ArgFor("bucket-id")
 			oid, _ := c.ArgFor("object-id")
 			ctype, _ := c.ArgFor("content-type")
-			AttachObjectBody(bid, oid, ctype)
+			AttachObjectBody(bid, oid, ctype, os.Stdin)
 		},
 	},
 	{
@@ -226,7 +222,11 @@ var ObjectCommands = []cli.Command{
 		Action: func(c *cli.Context) {
 			bid, _ := c.ArgFor("bucket-id")
 			ctype, _ := c.ArgFor("content-type")
-			CreateObjectAndPublishBody(bid, ctype)
+			r := goext.OptionalReader(func() io.Reader {
+				log.Fatalf(colorstring.Color("[red]object body must be given thru stdin"))
+				return nil
+			})
+			CreateObjectAndPublishBody(bid, ctype, r)
 		},
 	},
 }
