@@ -33,7 +33,7 @@ OK, you're ready to run kii-cli. Try `log` subcommand.
 
 You might not see any outputs, in the case, type next.
 
-    echo "function main() {}" > foobar
+    echo "function main(params, ctx) {}" > foobar
     kii-cli servercode deploy foobar
 
 Then try `log` again and you can see a line that showed you deployed a servercode.
