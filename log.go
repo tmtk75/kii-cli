@@ -48,9 +48,10 @@ type AuthRequest struct {
 	ClientID     string `json:"clientID"`
 	ClientSecret string `json:"clientSecret"`
 	//	Token        string
-	Command string `json:"command"` // 'tail' or 'cat'
-	//	UserID       string
-	//	Level        string
+	Command  string `json:"command"` // 'tail' or 'cat'
+	UserID   string `json:"userID"`
+	Level    string `json:"level"`
+	Limit    int    `json:"limit"`
 	DateFrom string `json:"dateFrom"`
 	DateTo   string `json:"dateTo"`
 }
@@ -73,6 +74,10 @@ func (s *AuthRequest) Parse(c *cli.Context) {
 	}
 	//t, _ := time.Parse("2006-01-02 15:04:05", "2012-01-01 12:12:12")
 	//return t.Format("2006-01-02 15:04:05")
+
+	s.Limit = c.Int("num")
+	s.UserID = c.String("user-id")
+	s.Level = strings.ToUpper(c.String("level"))
 
 	if c.String("date-from") != "" {
 		s.DateFrom = c.String("date-from") //"2015-01-08:07:40:00",
@@ -123,6 +128,7 @@ func StartLogging(c *cli.Context) {
 				m.Print(i)
 			}
 			if req.Command == "cat" {
+				ws.Close()
 				os.Exit(0)
 			}
 		}
@@ -220,6 +226,9 @@ var LogCommands = []cli.Command{
 		Name:  "log",
 		Usage: "Disply logs for an app",
 		Flags: []cli.Flag{
+			cli.StringFlag{Name: "level", Usage: "Filtering with level"},
+			cli.IntFlag{Name: "num,n", Value: 100, Usage: "Show specified number of lines"},
+			cli.StringFlag{Name: "user-id", Usage: "Filtering with UserID"},
 			cli.BoolFlag{Name: "tail,t", Usage: "Similar to tail -f"},
 			cli.StringFlag{Name: "format-file", Usage: "File path to a format file", Value: (func() string {
 				d, _ := homedir.Dir()
