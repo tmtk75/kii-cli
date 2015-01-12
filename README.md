@@ -39,7 +39,7 @@ You might not see any outputs, in the case, type next.
 Then try `log` again and you can see a line that showed you deployed a servercode.
 
     kii-cli log
-    0001: &{servercode.file.deploy INFO Server Code File deployed 2014-07-01 14:37:27.92 +0000 UTC}
+    2015-01-08T23:14:52.229Z [INFO] servercode.file.deploy description:Server Code File deployed data-type:application/javascript versionID:efag40m0pxqyzxi7zkkftw3d1
 
 TBD
 
@@ -54,7 +54,7 @@ USAGE:
    kii-cli [global options] command [command options] [arguments...]
 
 VERSION:
-   0.1.2
+   0.1.4
 
 COMMANDS:
    auth         Authentication
@@ -65,6 +65,7 @@ COMMANDS:
    bucket       Bucket management
    object       Object management
    dev          Development support
+   profile      Profile management
    help, h      Shows a list of commands or help for one command
    
 GLOBAL OPTIONS:
@@ -74,9 +75,12 @@ GLOBAL OPTIONS:
    --client-secret      ClientSecret
    --site               us,jp,cn,sg
    --endpoint-url       Site URL
+   --log-url            Log URL
    --verbose            Verbosely
    --profile 'default'  Profile name for ~/.kii/config
+   --profile-path       Profile path instead of ~/.kii/config
    --curl               Print curl command saving body as a tmp file if body exists
+   --suppress-exit      Suppress exit with 1 when receiving status code other than 2xx
    --help, -h           show help
    --version, -v        print the version
 ```
