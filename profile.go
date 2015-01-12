@@ -15,7 +15,8 @@ var ProfileCommands = []cli.Command{
 		Name:  "ls",
 		Usage: "List profiles in your config",
 		Action: func(c *cli.Context) {
-			file, _ := loadIniFile()
+			profilePath := profilePath(c)
+			file, _ := loadIniFile(profilePath)
 			for _, s := range *file {
 				if v, has := s["profile"]; has {
 					fmt.Printf("default-profile: %v\n", v)
