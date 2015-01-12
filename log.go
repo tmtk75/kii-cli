@@ -48,27 +48,50 @@ type AuthRequest struct {
 	ClientID     string `json:"clientID"`
 	ClientSecret string `json:"clientSecret"`
 	//	Token        string
-	Command string `json:"command"` // 'tail' or 'cat'
-	//	UserID       string
-	//	Level        string
-	//	DateFrom     string
-	//	DateTo       string
+	Command  string `json:"command"` // 'tail' or 'cat'
+	UserID   string `json:"userID"`
+	Level    string `json:"level"`
+	Limit    int    `json:"limit"`
+	DateFrom string `json:"dateFrom"`
+	DateTo   string `json:"dateTo"`
 }
 
 func (self *GlobalConfig) AuthRequest() *AuthRequest {
 	req := &AuthRequest{
-		self.AppId,
-		self.AppKey,
-		self.ClientId,
-		self.ClientSecret,
-		"tail",
+		AppID:        self.AppId,
+		AppKey:       self.AppKey,
+		ClientID:     self.ClientId,
+		ClientSecret: self.ClientSecret,
 	}
 	return req
 }
 
-func StartLogging() {
+func (s *AuthRequest) Parse(c *cli.Context) {
+	//
+	s.Command = "cat"
+	if c.Bool("tail") {
+		s.Command = "tail" //cat
+	}
+	//t, _ := time.Parse("2006-01-02 15:04:05", "2012-01-01 12:12:12")
+	//return t.Format("2006-01-02 15:04:05")
+
+	s.Limit = c.Int("num")
+	s.UserID = c.String("user-id")
+	s.Level = strings.ToUpper(c.String("level"))
+
+	if c.String("date-from") != "" {
+		s.DateFrom = c.String("date-from") //"2015-01-08:07:40:00",
+	}
+	if c.String("date-to") != "" {
+		s.DateTo = c.String("date-to") //"2015-01-09:00:00:00",
+	}
+}
+
+func StartLogging(c *cli.Context) {
 	p := Profile()
 	req := p.AuthRequest()
+	req.Parse(c)
+
 	j, err := json.Marshal(req)
 	if err != nil {
 		panic(err)
@@ -104,6 +127,10 @@ func StartLogging() {
 			for i, m := range msg {
 				m.Print(i)
 			}
+			if req.Command == "cat" {
+				ws.Close()
+				os.Exit(0)
+			}
 		}
 	}()
 
@@ -122,6 +149,8 @@ func StartLogging() {
 			//log.Printf("wrote %d", len(msg))
 		}
 	}
+
+	//TODO: gracefully exit when cat mode
 }
 
 type RawFormat map[string]string
@@ -197,15 +226,21 @@ var LogCommands = []cli.Command{
 		Name:  "log",
 		Usage: "Disply logs for an app",
 		Flags: []cli.Flag{
+			cli.StringFlag{Name: "level", Usage: "Filtering with level"},
+			cli.IntFlag{Name: "num,n", Value: 100, Usage: "Show specified number of lines"},
+			cli.StringFlag{Name: "user-id", Usage: "Filtering with UserID"},
+			cli.BoolFlag{Name: "tail,t", Usage: "Similar to tail -f"},
 			cli.StringFlag{Name: "format-file", Usage: "File path to a format file", Value: (func() string {
 				d, _ := homedir.Dir()
 				return fmt.Sprintf("%v/.kii/format.json", d)
 			})(),
 			},
+			cli.StringFlag{Name: "date-from", Usage: "Filtering from specified date"},
+			cli.StringFlag{Name: "date-to", Usage: "Filtering until specified date"},
 		},
 		Action: func(c *cli.Context) {
 			format = LoadFormat(c.String("format-file"))
-			StartLogging()
+			StartLogging(c)
 		},
 	},
 }
