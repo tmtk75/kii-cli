@@ -122,6 +122,9 @@ func StartLogging(c *cli.Context) {
 			for i, m := range msg {
 				m.Print(i)
 			}
+			if req.Command == "cat" {
+				os.Exit(0)
+			}
 		}
 	}()
 
