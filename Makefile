@@ -11,7 +11,7 @@ release: ./kii-cli
 	ghr -u tmtk75 v$(version) pkg
 
 ./kii-cli:
-	go build
+	go build cmd/kii-cli/kii-cli.go
 
 hash:
 	shasum -a1 pkg/*_amd64.{gz,zip}
