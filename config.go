@@ -139,8 +139,7 @@ client_secret =
 site = jp
 `
 
-func loadIniFile() (*ini.File, bool /* true: generated config */) {
-	configPath := metaFilePath(".", "config")
+func loadIniFile(configPath string) (*ini.File, bool /* true: generated config */) {
 	if b, _ := exists(configPath); !b {
 		ioutil.WriteFile(configPath, []byte(_config), 0600)
 		return nil, true
@@ -163,6 +162,14 @@ func pickup(a ...string) string {
 
 const DEFAULT_PROFILE = "default"
 
+func profilePath(c *cli.Context) string {
+	p := metaFilePath(".", "config")
+	if c.String("profile-path") != "" {
+		return c.String("profile-path")
+	}
+	return p
+}
+
 func SetupFlags(app *cli.App) {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{Name: "app-id", Value: "", Usage: "AppID"},
@@ -171,8 +178,10 @@ func SetupFlags(app *cli.App) {
 		cli.StringFlag{Name: "client-secret", Value: "", Usage: "ClientSecret"},
 		cli.StringFlag{Name: "site", Value: "", Usage: "us,jp,cn,sg"},
 		cli.StringFlag{Name: "endpoint-url", Value: "", Usage: "Site URL"},
+		cli.StringFlag{Name: "log-url", Value: "", Usage: "Log URL"},
 		cli.BoolFlag{Name: "verbose", Usage: "Verbosely"},
 		cli.StringFlag{Name: "profile", Value: DEFAULT_PROFILE, Usage: "Profile name for ~/.kii/config"},
+		cli.StringFlag{Name: "profile-path", Usage: "Profile path instead of ~/.kii/config"},
 		cli.BoolFlag{Name: "curl", Usage: "Print curl command saving body as a tmp file if body exists"},
 		cli.BoolFlag{Name: "suppress-exit", Usage: "Suppress exit with 1 when receiving status code other than 2xx"},
 	}
@@ -183,9 +192,12 @@ func SetupFlags(app *cli.App) {
 			logger = log.New(os.Stderr, "", log.LstdFlags)
 		}
 
-		inifile, gen := loadIniFile()
+		profilePath := profilePath(c)
+		logger.Printf("profile-path: %v", profilePath)
+
+		inifile, gen := loadIniFile(profilePath)
 		if gen {
-			print(fmt.Sprintf("~/.kii/config was created. please fill it with your credentials.\n"))
+			print(fmt.Sprintf("%v was created. please fill it with your credentials.\n", profilePath))
 			os.Exit(ExitGeneralReason)
 		}
 
@@ -199,7 +211,7 @@ func SetupFlags(app *cli.App) {
 		logger.Printf("profile: %v", profile)
 
 		if profile != DEFAULT_PROFILE && len((*inifile)[profile]) == 0 {
-			print(fmt.Sprintf("profile %s is not found in ~/.kii/config\n", profile))
+			print(fmt.Sprintf("profile %s is not found in %v\n", profile, profilePath))
 			os.Exit(ExitMissingParams)
 		}
 

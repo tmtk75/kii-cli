@@ -1,0 +1,20 @@
+{
+  "kiicloud://users": [
+    {
+      "when": "USER_CREATED",
+      "what": "EXECUTE_SERVER_CODE",
+      "endpoint": "main"
+    }
+  ],
+  "kiicloud://scheduler": {
+    "HourlyMessage": {
+      "what": "EXECUTE_SERVER_CODE",
+      "cron": "0 * * * *",
+      "endpoint": "main",
+      "parameters": {
+	"username": "mike",
+        "message": "Hi! Mike"
+      }
+    }
+  }
+}

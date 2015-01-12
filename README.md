@@ -25,7 +25,7 @@ Create config file in `~/.kii/config` as follow.
 First, login to get your app admin access token.
 If you encounter an error message, please make sure your credentials in `default` section of `~/.kii/config`.
 
-    kii-cli login
+    kii-cli auth login
 
 OK, you're ready to run kii-cli. Try `log` subcommand.
 
@@ -33,8 +33,8 @@ OK, you're ready to run kii-cli. Try `log` subcommand.
 
 You might not see any outputs, in the case, type next.
 
-    touch foobar
-    kii-cli servercode:deploy foobar
+    echo "function main(params, ctx) {}" > foobar
+    kii-cli servercode deploy foobar
 
 Then try `log` again and you can see a line that showed you deployed a servercode.
 
