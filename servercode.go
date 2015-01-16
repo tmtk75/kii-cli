@@ -107,7 +107,7 @@ func PrintVersions(vers *Versions, quite bool, active bool) {
 	sort.Sort(vers.Versions)
 	for _, raw := range vers.Versions {
 		v := raw.Version()
-		t := v.CreatedAt.Format("2006-01-02 15:04:05")
+		t := v.CreatedAt.Format(time.RFC3339)
 		if active && !raw.Active {
 			continue
 		}
@@ -208,8 +208,8 @@ func ListExecutions() {
 		panic(err)
 	}
 	for _, e := range r.Results {
-		s := time.Unix(e.StartedAt/1000, 0).Format("2006-01-02 15:04:05")
-		f := time.Unix(e.FinishedAt/1000, 0).Format("2006-01-02 15:04:05")
+		s := time.Unix(e.StartedAt/1000, 0).Format(time.RFC3339)
+		f := time.Unix(e.FinishedAt/1000, 0).Format(time.RFC3339)
 		fmt.Printf("%v\t%v\t%v\t%v\t%v\n", e.Id, s, f, e.Status, e.Name)
 	}
 }
