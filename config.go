@@ -180,7 +180,7 @@ func SetupFlags(app *cli.App) {
 		cli.StringFlag{Name: "endpoint-url", Value: "", Usage: "Site URL"},
 		cli.StringFlag{Name: "log-url", Value: "", Usage: "Log URL"},
 		cli.BoolFlag{Name: "verbose", Usage: "Verbosely"},
-		cli.StringFlag{Name: "profile", Value: DEFAULT_PROFILE, Usage: "Profile name for ~/.kii/config"},
+		cli.StringFlag{Name: "profile,p", Value: DEFAULT_PROFILE, Usage: "Profile name for ~/.kii/config"},
 		cli.StringFlag{Name: "profile-path", Usage: "Profile path instead of ~/.kii/config"},
 		cli.BoolFlag{Name: "curl", Usage: "Print curl command saving body as a tmp file if body exists"},
 		cli.BoolFlag{Name: "suppress-exit", Usage: "Suppress exit with 1 when receiving status code other than 2xx"},
