@@ -20,7 +20,7 @@ type Headers map[string]string
 func DeployServerCode(serverCodePath string, activate bool) string {
 	code, err := ioutil.ReadFile(serverCodePath)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	p := Profile()
 	path := fmt.Sprintf("/apps/%s/server-code", p.AppId)
@@ -145,7 +145,7 @@ func DeleteServerCode(version string) {
 func AttachHookConfig(hookConfigPath, version string) {
 	code, err := ioutil.ReadFile(hookConfigPath)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	p := Profile()
 	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", p.AppId, version)
