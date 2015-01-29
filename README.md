@@ -2,6 +2,12 @@
 
 # Installation
 
+```
+go get github.com/tmtk75/kii-cli/cmd/kii-cli
+```
+
+or
+
 Download binary from <https://github.com/tmtk75/kii-cli/releases>
 
 
