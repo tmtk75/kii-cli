@@ -301,6 +301,24 @@ var ServerCodeCommands = []cli.Command{
 		Name:  "hook-attach",
 		Usage: "Attach a hook config to current or specified server code",
 		Args:  "<hook-config-path> [version]",
+		Description: `An example of definition of server hook config 
+
+      {
+        "kiicloud://users" : [ {
+          "what" : "EXECUTE_SERVER_CODE",
+          "when" : "USER_CREATED",
+          "endpoint" : "main"
+        } ],
+        "kiicloud://scheduler" : {
+          "HourlyMessage" : {
+            "what" : "EXECUTE_SERVER_CODE",
+            "name" : "HourlyMessage",
+            "cron" : "15 * * * *",
+            "endpoint" : "main",
+            "parameters" : {"message" : "Hello"}
+          }
+        }
+      }`,
 		Action: func(c *cli.Context) {
 			path, _ := c.ArgFor("hook-config-path")
 			ver := getActiveVersion(c)
