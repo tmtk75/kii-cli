@@ -47,13 +47,13 @@ type AuthRequest struct {
 	AppKey       string `json:"appKey"`
 	ClientID     string `json:"clientID"`
 	ClientSecret string `json:"clientSecret"`
-	//	Token        string
-	Command  string `json:"command"` // 'tail' or 'cat'
-	UserID   string `json:"userID"`
-	Level    string `json:"level"`
-	Limit    int    `json:"limit"`
-	DateFrom string `json:"dateFrom"`
-	DateTo   string `json:"dateTo"`
+	Token        string `json:"token"`
+	Command      string `json:"command"` // 'tail' or 'cat'
+	UserID       string `json:"userID"`
+	Level        string `json:"level"`
+	Limit        int    `json:"limit"`
+	DateFrom     string `json:"dateFrom"`
+	DateTo       string `json:"dateTo"`
 }
 
 func (self *GlobalConfig) AuthRequest() *AuthRequest {
@@ -62,6 +62,7 @@ func (self *GlobalConfig) AuthRequest() *AuthRequest {
 		AppKey:       self.AppKey,
 		ClientID:     self.ClientId,
 		ClientSecret: self.ClientSecret,
+		Token:        self.Token,
 	}
 	return req
 }
@@ -226,7 +227,7 @@ var LogCommands = []cli.Command{
 		Name:  "log",
 		Usage: "Disply logs for an app",
 		Flags: []cli.Flag{
-			cli.StringFlag{Name: "level", Usage: "Filtering with level"},
+			cli.StringFlag{Name: "level", Usage: "Filtering with level. e.g) DEBUG, INFO, ERROR"},
 			cli.IntFlag{Name: "num,n", Value: 100, Usage: "Show specified number of lines"},
 			cli.StringFlag{Name: "user-id", Usage: "Filtering with UserID"},
 			cli.BoolFlag{Name: "tail,t", Usage: "Similar to tail -f"},

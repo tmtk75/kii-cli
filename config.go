@@ -17,6 +17,7 @@ type GlobalConfig struct {
 	AppKey       string
 	ClientId     string
 	ClientSecret string
+	Token        string
 	Site         string
 	endpointUrl  string
 	devlogUrl    string
@@ -84,7 +85,14 @@ func (self *GlobalConfig) HttpHeaders(contentType string) map[string]string {
 func (self *GlobalConfig) HttpHeadersWithAuthorization(contentType string) map[string]string {
 	m := self.HttpHeaders(contentType)
 	oauth2 := (&OAuth2Response{}).Load()
-	m["authorization"] = fmt.Sprintf("Bearer %s", oauth2.AccessToken)
+
+	// overwirte token with given value
+	token := oauth2.AccessToken
+	if self.Token != "" {
+		token = self.Token
+	}
+
+	m["authorization"] = fmt.Sprintf("Bearer %s", token)
 	return m
 }
 
@@ -176,6 +184,7 @@ func SetupFlags(app *cli.App) {
 		cli.StringFlag{Name: "app-key", Value: "", Usage: "AppKey"},
 		cli.StringFlag{Name: "client-id", Value: "", Usage: "ClientID"},
 		cli.StringFlag{Name: "client-secret", Value: "", Usage: "ClientSecret"},
+		cli.StringFlag{Name: "token", Value: "", Usage: "Token to be used"},
 		cli.StringFlag{Name: "site", Value: "", Usage: "us,jp,cn,sg"},
 		cli.StringFlag{Name: "endpoint-url", Value: "", Usage: "Site URL"},
 		cli.StringFlag{Name: "log-url", Value: "", Usage: "Log URL"},
@@ -226,6 +235,7 @@ func SetupFlags(app *cli.App) {
 			AppKey:       getConf("app-key", "KII_APP_KEY", "app_key"),
 			ClientId:     getConf("client-id", "KII_CLIENT_ID", "client_id"),
 			ClientSecret: getConf("client-secret", "KII_CLIENT_SECRET", "client_secret"),
+			Token:        getConf("token", "KII_TOKEN", ""),
 			Site:         getConf("site", "KII_SITE", "site"),
 			endpointUrl:  getConf("endpoint-url", "KII_ENDPOINT_URL", "endpoint_url"),
 			devlogUrl:    getConf("log-url", "KII_LOG_URL", "log_url"),
