@@ -118,12 +118,12 @@ type DirPath []string
 func (dir DirPath) MetaFilePath(filename string) string {
 	homedir, err := homedir.Dir()
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	confdirpath := path.Join(homedir, ".kii", path.Join(dir...))
 	err = os.MkdirAll(confdirpath, os.ModeDir|0700)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	return path.Join(confdirpath, filename)
 }
@@ -154,7 +154,7 @@ func loadIniFile(configPath string) (*ini.File, bool /* true: generated config *
 	}
 	file, err := ini.LoadFile(configPath)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	return &file, false
 }

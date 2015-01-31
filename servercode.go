@@ -98,7 +98,7 @@ func ListVersions() *Versions {
 	vers := Versions{}
 	err := json.Unmarshal(b, &vers)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	return &vers
 }
@@ -205,7 +205,7 @@ func ListExecutions() {
 	b := HttpPost(path, headers, bytes.NewReader([]byte(q))).Bytes()
 	var r ExecutionResult
 	if err := json.Unmarshal(b, &r); err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	for _, e := range r.Results {
 		s := time.Unix(e.StartedAt/1000, 0).Format(time.RFC3339)

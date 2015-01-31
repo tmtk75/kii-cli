@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/signal"
 	"regexp"
@@ -25,7 +26,7 @@ func (self *RawLog) Log() *Log {
 	f := time.RFC3339Nano // "2006-01-02T15:04:05.999Z"
 	t, err := time.Parse(f, (*self)["time"].(string))
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	return &Log{
 		(*self)["key"].(string),
@@ -95,7 +96,7 @@ func StartLogging(c *cli.Context) {
 
 	j, err := json.Marshal(req)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	//fmt.Printf("%s", string(j))
 
@@ -104,11 +105,11 @@ func StartLogging(c *cli.Context) {
 	logger.Printf("%s", j)
 	ws, err := websocket.Dial(url, "", "http://localhost/")
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	_, err = ws.Write(j)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 
 	sigc := make(chan os.Signal, 1)
@@ -144,7 +145,7 @@ func StartLogging(c *cli.Context) {
 				os.Exit(0)
 			}
 			if err != nil {
-				panic(err)
+				log.Fatalf("%v", err)
 			}
 			rch <- msg
 			//log.Printf("wrote %d", len(msg))
@@ -162,7 +163,7 @@ var format Format
 func LoadFormat(path string) Format {
 	e, err := exists(path)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 
 	if !e {
@@ -172,12 +173,12 @@ func LoadFormat(path string) Format {
 
 	body, err := ioutil.ReadFile(path)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 
 	f := make(RawFormat)
 	if err := json.Unmarshal(body, &f); err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 
 	r := make(Format)
@@ -185,7 +186,7 @@ func LoadFormat(path string) Format {
 		s := convertLogFormat(v)
 		t, err := template.New(k).Parse(s)
 		if err != nil {
-			panic(err)
+			log.Fatalf("%v", err)
 		}
 		r[k] = t
 	}
