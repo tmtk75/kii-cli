@@ -193,6 +193,8 @@ func SetupFlags(app *cli.App) {
 		cli.StringFlag{Name: "profile-path", Usage: "Profile path instead of ~/.kii/config"},
 		cli.BoolFlag{Name: "curl", Usage: "Print curl command saving body as a tmp file if body exists"},
 		cli.BoolFlag{Name: "suppress-exit", Usage: "Suppress exit with 1 when receiving status code other than 2xx"},
+		cli.StringFlag{Name: "http-proxy", Usage: "HTTP proxy URL to be used"},
+		cli.BoolFlag{Name: "disable-http-proxy", Usage: "Disable HTTP proxy in your profile"},
 	}
 
 	app.Before = func(c *cli.Context) error {
@@ -241,6 +243,20 @@ func SetupFlags(app *cli.App) {
 			devlogUrl:    getConf("log-url", "KII_LOG_URL", "log_url"),
 			Curl:         c.GlobalBool("curl"),
 			SuppressExit: c.GlobalBool("suppress-exit"),
+		}
+
+		proxy := c.String("http-proxy")
+		if proxy == "" && !c.Bool("disable-http-proxy") {
+			p, _ := inifile.Get(profile, "http_proxy")
+			proxy = p
+			if proxy == "" {
+				p, _ := inifile.Get("", "http_proxy")
+				proxy = p
+			}
+		}
+		if proxy != "" {
+			logger.Printf("http_proxy: %v", proxy)
+			os.Setenv("HTTP_PROXY", proxy)
 		}
 
 		return nil
