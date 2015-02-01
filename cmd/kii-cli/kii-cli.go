@@ -11,7 +11,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "kii-cli"
 	app.Usage = "KiiCloud command line interface"
-	app.Version = "0.1.5dev"
+	app.Version = "0.1.5"
 	app.Commands = []cli.Command{
 		cli.Command{
 			Name:        "auth",

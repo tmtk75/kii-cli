@@ -54,7 +54,7 @@ USAGE:
    kii-cli [global options] command [command options] [arguments...]
 
 VERSION:
-   0.1.4
+   0.1.5
 
 COMMANDS:
    auth         Authentication
@@ -69,20 +69,24 @@ COMMANDS:
    help, h      Shows a list of commands or help for one command
    
 GLOBAL OPTIONS:
-   --app-id             AppID
-   --app-key            AppKey
-   --client-id          ClientID
-   --client-secret      ClientSecret
-   --site               us,jp,cn,sg
-   --endpoint-url       Site URL
-   --log-url            Log URL
-   --verbose            Verbosely
-   --profile 'default'  Profile name for ~/.kii/config
-   --profile-path       Profile path instead of ~/.kii/config
-   --curl               Print curl command saving body as a tmp file if body exists
-   --suppress-exit      Suppress exit with 1 when receiving status code other than 2xx
-   --help, -h           show help
-   --version, -v        print the version
+   --app-id                  AppID
+   --app-key                 AppKey
+   --client-id               ClientID
+   --client-secret           ClientSecret
+   --token                   Token to be used
+   --site                    us,jp,cn,sg
+   --endpoint-url            Site URL
+   --log-url                 Log URL
+   --verbose                 Verbosely
+   --profile, -p 'default'   Profile name for ~/.kii/config
+   --profile-path            Profile path instead of ~/.kii/config
+   --curl                    Print curl command saving body as a tmp file if body exists
+   --suppress-exit           Suppress exit with 1 when receiving status code other than 2xx
+   --http-proxy              HTTP proxy URL to be used
+   --disable-http-proxy      Disable HTTP proxy in your profile
+   --use-utc                 Format time in UTC
+   --help, -h                show help
+   --version, -v             print the version
 ```
 
 And supports flat-style subcommands.
