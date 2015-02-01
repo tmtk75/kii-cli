@@ -210,14 +210,6 @@ func norm(k string) string {
 	return fmt.Sprintf(`.%v`, k)
 }
 
-func timeStringInUTCToLocalTime(s string) (time.Time, error) {
-	t, err := time.Parse(time.RFC3339Nano, s)
-	if err != nil {
-		return t, err
-	}
-	return t.Local(), nil
-}
-
 func (m *RawLog) Print(idx int) {
 	key := (*m)["key"].(string)
 	f := format[key]
@@ -227,7 +219,7 @@ func (m *RawLog) Print(idx int) {
 	}
 
 	w := bytes.NewBuffer([]byte{})
-	t, _ := timeStringInUTCToLocalTime((*m)["time"].(string))
+	t, _ := timeFromStringInUTC((*m)["time"].(string))
 	(*m)["time"] = t.Format(time.RFC3339Nano)
 	f.Execute(w, *m)
 	fmt.Printf("%v\n", w)

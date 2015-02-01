@@ -82,7 +82,11 @@ func (self *RawVersion) Version() *Version {
 	if self.Active {
 		a = "active"
 	}
-	return &Version{self.VersionId, time.Unix(self.CreatedAt/1000, self.CreatedAt%1000*1000*1000), a}
+	return &Version{
+		VersionId: self.VersionId,
+		CreatedAt: timeFromUnix(self.CreatedAt),
+		Active:    a,
+	}
 }
 
 func ListServerCode(quite bool, active bool) {
@@ -208,8 +212,8 @@ func ListExecutions() {
 		log.Fatalf("%v", err)
 	}
 	for _, e := range r.Results {
-		s := time.Unix(e.StartedAt/1000, 0).Format(time.RFC3339)
-		f := time.Unix(e.FinishedAt/1000, 0).Format(time.RFC3339)
+		s := timeFromUnix(e.StartedAt).Format(time.RFC3339)
+		f := timeFromUnix(e.FinishedAt).Format(time.RFC3339)
 		fmt.Printf("%v\t%v\t%v\t%v\t%v\n", e.Id, s, f, e.Status, e.Name)
 	}
 }

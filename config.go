@@ -23,6 +23,7 @@ type GlobalConfig struct {
 	devlogUrl    string
 	Curl         bool
 	SuppressExit bool
+	UTC          bool
 }
 
 const (
@@ -195,6 +196,7 @@ func SetupFlags(app *cli.App) {
 		cli.BoolFlag{Name: "suppress-exit", Usage: "Suppress exit with 1 when receiving status code other than 2xx"},
 		cli.StringFlag{Name: "http-proxy", Usage: "HTTP proxy URL to be used"},
 		cli.BoolFlag{Name: "disable-http-proxy", Usage: "Disable HTTP proxy in your profile"},
+		cli.BoolFlag{Name: "use-utc", Usage: "Format time in UTC"},
 	}
 
 	app.Before = func(c *cli.Context) error {
@@ -243,6 +245,7 @@ func SetupFlags(app *cli.App) {
 			devlogUrl:    getConf("log-url", "KII_LOG_URL", "log_url"),
 			Curl:         c.GlobalBool("curl"),
 			SuppressExit: c.GlobalBool("suppress-exit"),
+			UTC:          c.GlobalBool("use-utc"),
 		}
 
 		proxy := c.String("http-proxy")
