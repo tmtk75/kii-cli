@@ -49,7 +49,7 @@ func httpRequest(method string, path string, headers Headers, r io.Reader) *Http
 	body, _ := ioutil.ReadAll(r)
 	req, err := http.NewRequest(method, ep, bytes.NewReader(body))
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	for k, v := range headers {
 		req.Header.Add(k, v)
@@ -63,7 +63,7 @@ func httpRequest(method string, path string, headers Headers, r io.Reader) *Http
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	logger.Printf("status-code: %v", res.StatusCode)
 	if res.StatusCode/100 != 2 && !p.SuppressExit {
@@ -86,7 +86,7 @@ func printCurlString(method string, header Headers, endpoint string, body []byte
 	dataDir := fmt.Sprintf("%v", metaFilePath(p.AppId, ""))
 	tmp, err := ioutil.TempFile(dataDir, "curl-data.")
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	tmp.Write(body)
 	defer tmp.Close()

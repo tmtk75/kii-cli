@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 
@@ -33,7 +34,7 @@ type OAuth2Response struct {
 func (self *OAuth2Response) Bytes() []byte {
 	it, err := json.Marshal(self)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	return it
 }
@@ -41,7 +42,7 @@ func (self *OAuth2Response) Bytes() []byte {
 func (self *OAuth2Response) Save(filename string) {
 	err := ioutil.WriteFile(filename, self.Bytes(), 0600)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 }
 
@@ -62,7 +63,7 @@ func (self *OAuth2Response) LoadFrom(path string) *OAuth2Response {
 	file, _ := os.Open(path)
 	body, err := ioutil.ReadAll(bufio.NewReader(file))
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	defer file.Close()
 	json.Unmarshal(body, self)
@@ -73,7 +74,7 @@ func (self *OAuth2Response) Decode(res *HttpResponse) *OAuth2Response {
 	d := json.NewDecoder(res.Body)
 	err := d.Decode(&self)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	return self
 }

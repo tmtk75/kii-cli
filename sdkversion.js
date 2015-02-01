@@ -7,6 +7,7 @@ function main(params, ctx) {
       "versions": {
         "storage": Kii.getSDKVersion(),
         "analytics": KiiAnalytics.getSDKVersion(),
-      }
+      },
+      "now": (new Date)
     }
 }

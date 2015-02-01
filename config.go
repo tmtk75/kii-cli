@@ -17,11 +17,13 @@ type GlobalConfig struct {
 	AppKey       string
 	ClientId     string
 	ClientSecret string
+	Token        string
 	Site         string
 	endpointUrl  string
 	devlogUrl    string
 	Curl         bool
 	SuppressExit bool
+	UTC          bool
 }
 
 const (
@@ -84,7 +86,14 @@ func (self *GlobalConfig) HttpHeaders(contentType string) map[string]string {
 func (self *GlobalConfig) HttpHeadersWithAuthorization(contentType string) map[string]string {
 	m := self.HttpHeaders(contentType)
 	oauth2 := (&OAuth2Response{}).Load()
-	m["authorization"] = fmt.Sprintf("Bearer %s", oauth2.AccessToken)
+
+	// overwirte token with given value
+	token := oauth2.AccessToken
+	if self.Token != "" {
+		token = self.Token
+	}
+
+	m["authorization"] = fmt.Sprintf("Bearer %s", token)
 	return m
 }
 
@@ -110,12 +119,12 @@ type DirPath []string
 func (dir DirPath) MetaFilePath(filename string) string {
 	homedir, err := homedir.Dir()
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	confdirpath := path.Join(homedir, ".kii", path.Join(dir...))
 	err = os.MkdirAll(confdirpath, os.ModeDir|0700)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	return path.Join(confdirpath, filename)
 }
@@ -146,7 +155,7 @@ func loadIniFile(configPath string) (*ini.File, bool /* true: generated config *
 	}
 	file, err := ini.LoadFile(configPath)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	return &file, false
 }
@@ -176,14 +185,18 @@ func SetupFlags(app *cli.App) {
 		cli.StringFlag{Name: "app-key", Value: "", Usage: "AppKey"},
 		cli.StringFlag{Name: "client-id", Value: "", Usage: "ClientID"},
 		cli.StringFlag{Name: "client-secret", Value: "", Usage: "ClientSecret"},
+		cli.StringFlag{Name: "token", Value: "", Usage: "Token to be used"},
 		cli.StringFlag{Name: "site", Value: "", Usage: "us,jp,cn,sg"},
 		cli.StringFlag{Name: "endpoint-url", Value: "", Usage: "Site URL"},
 		cli.StringFlag{Name: "log-url", Value: "", Usage: "Log URL"},
 		cli.BoolFlag{Name: "verbose", Usage: "Verbosely"},
-		cli.StringFlag{Name: "profile", Value: DEFAULT_PROFILE, Usage: "Profile name for ~/.kii/config"},
+		cli.StringFlag{Name: "profile,p", Value: DEFAULT_PROFILE, Usage: "Profile name for ~/.kii/config"},
 		cli.StringFlag{Name: "profile-path", Usage: "Profile path instead of ~/.kii/config"},
 		cli.BoolFlag{Name: "curl", Usage: "Print curl command saving body as a tmp file if body exists"},
 		cli.BoolFlag{Name: "suppress-exit", Usage: "Suppress exit with 1 when receiving status code other than 2xx"},
+		cli.StringFlag{Name: "http-proxy", Usage: "HTTP proxy URL to be used"},
+		cli.BoolFlag{Name: "disable-http-proxy", Usage: "Disable HTTP proxy in your profile"},
+		cli.BoolFlag{Name: "use-utc", Usage: "Format time in UTC"},
 	}
 
 	app.Before = func(c *cli.Context) error {
@@ -226,11 +239,27 @@ func SetupFlags(app *cli.App) {
 			AppKey:       getConf("app-key", "KII_APP_KEY", "app_key"),
 			ClientId:     getConf("client-id", "KII_CLIENT_ID", "client_id"),
 			ClientSecret: getConf("client-secret", "KII_CLIENT_SECRET", "client_secret"),
+			Token:        getConf("token", "KII_TOKEN", ""),
 			Site:         getConf("site", "KII_SITE", "site"),
 			endpointUrl:  getConf("endpoint-url", "KII_ENDPOINT_URL", "endpoint_url"),
 			devlogUrl:    getConf("log-url", "KII_LOG_URL", "log_url"),
 			Curl:         c.GlobalBool("curl"),
 			SuppressExit: c.GlobalBool("suppress-exit"),
+			UTC:          c.GlobalBool("use-utc"),
+		}
+
+		proxy := c.String("http-proxy")
+		if proxy == "" && !c.Bool("disable-http-proxy") {
+			p, _ := inifile.Get(profile, "http_proxy")
+			proxy = p
+			if proxy == "" {
+				p, _ := inifile.Get("", "http_proxy")
+				proxy = p
+			}
+		}
+		if proxy != "" {
+			logger.Printf("http_proxy: %v", proxy)
+			os.Setenv("HTTP_PROXY", proxy)
 		}
 
 		return nil

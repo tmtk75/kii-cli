@@ -20,7 +20,7 @@ type Headers map[string]string
 func DeployServerCode(serverCodePath string, activate bool) string {
 	code, err := ioutil.ReadFile(serverCodePath)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	p := Profile()
 	path := fmt.Sprintf("/apps/%s/server-code", p.AppId)
@@ -82,7 +82,11 @@ func (self *RawVersion) Version() *Version {
 	if self.Active {
 		a = "active"
 	}
-	return &Version{self.VersionId, time.Unix(self.CreatedAt/1000, self.CreatedAt%1000*1000*1000), a}
+	return &Version{
+		VersionId: self.VersionId,
+		CreatedAt: timeFromUnix(self.CreatedAt),
+		Active:    a,
+	}
 }
 
 func ListServerCode(quite bool, active bool) {
@@ -98,7 +102,7 @@ func ListVersions() *Versions {
 	vers := Versions{}
 	err := json.Unmarshal(b, &vers)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	return &vers
 }
@@ -107,7 +111,7 @@ func PrintVersions(vers *Versions, quite bool, active bool) {
 	sort.Sort(vers.Versions)
 	for _, raw := range vers.Versions {
 		v := raw.Version()
-		t := v.CreatedAt.Format("2006-01-02 15:04:05")
+		t := v.CreatedAt.Format(time.RFC3339)
 		if active && !raw.Active {
 			continue
 		}
@@ -145,7 +149,7 @@ func DeleteServerCode(version string) {
 func AttachHookConfig(hookConfigPath, version string) {
 	code, err := ioutil.ReadFile(hookConfigPath)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	p := Profile()
 	path := fmt.Sprintf("/apps/%s/hooks/versions/%s", p.AppId, version)
@@ -205,11 +209,11 @@ func ListExecutions() {
 	b := HttpPost(path, headers, bytes.NewReader([]byte(q))).Bytes()
 	var r ExecutionResult
 	if err := json.Unmarshal(b, &r); err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	for _, e := range r.Results {
-		s := time.Unix(e.StartedAt/1000, 0).Format("2006-01-02 15:04:05")
-		f := time.Unix(e.FinishedAt/1000, 0).Format("2006-01-02 15:04:05")
+		s := timeFromUnix(e.StartedAt).Format(time.RFC3339)
+		f := timeFromUnix(e.FinishedAt).Format(time.RFC3339)
 		fmt.Printf("%v\t%v\t%v\t%v\t%v\n", e.Id, s, f, e.Status, e.Name)
 	}
 }
@@ -301,6 +305,24 @@ var ServerCodeCommands = []cli.Command{
 		Name:  "hook-attach",
 		Usage: "Attach a hook config to current or specified server code",
 		Args:  "<hook-config-path> [version]",
+		Description: `An example of definition of server hook config 
+
+      {
+        "kiicloud://users" : [ {
+          "what" : "EXECUTE_SERVER_CODE",
+          "when" : "USER_CREATED",
+          "endpoint" : "main"
+        } ],
+        "kiicloud://scheduler" : {
+          "HourlyMessage" : {
+            "what" : "EXECUTE_SERVER_CODE",
+            "name" : "HourlyMessage",
+            "cron" : "15 * * * *",
+            "endpoint" : "main",
+            "parameters" : {"message" : "Hello"}
+          }
+        }
+      }`,
 		Action: func(c *cli.Context) {
 			path, _ := c.ArgFor("hook-config-path")
 			ver := getActiveVersion(c)

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/signal"
 	"regexp"
@@ -25,7 +26,7 @@ func (self *RawLog) Log() *Log {
 	f := time.RFC3339Nano // "2006-01-02T15:04:05.999Z"
 	t, err := time.Parse(f, (*self)["time"].(string))
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	return &Log{
 		(*self)["key"].(string),
@@ -47,13 +48,13 @@ type AuthRequest struct {
 	AppKey       string `json:"appKey"`
 	ClientID     string `json:"clientID"`
 	ClientSecret string `json:"clientSecret"`
-	//	Token        string
-	Command  string `json:"command"` // 'tail' or 'cat'
-	UserID   string `json:"userID"`
-	Level    string `json:"level"`
-	Limit    int    `json:"limit"`
-	DateFrom string `json:"dateFrom"`
-	DateTo   string `json:"dateTo"`
+	Token        string `json:"token"`
+	Command      string `json:"command"` // 'tail' or 'cat'
+	UserID       string `json:"userID"`
+	Level        string `json:"level"`
+	Limit        int    `json:"limit"`
+	DateFrom     string `json:"dateFrom"`
+	DateTo       string `json:"dateTo"`
 }
 
 func (self *GlobalConfig) AuthRequest() *AuthRequest {
@@ -62,6 +63,7 @@ func (self *GlobalConfig) AuthRequest() *AuthRequest {
 		AppKey:       self.AppKey,
 		ClientID:     self.ClientId,
 		ClientSecret: self.ClientSecret,
+		Token:        self.Token,
 	}
 	return req
 }
@@ -94,7 +96,7 @@ func StartLogging(c *cli.Context) {
 
 	j, err := json.Marshal(req)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	//fmt.Printf("%s", string(j))
 
@@ -103,11 +105,11 @@ func StartLogging(c *cli.Context) {
 	logger.Printf("%s", j)
 	ws, err := websocket.Dial(url, "", "http://localhost/")
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 	_, err = ws.Write(j)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 
 	sigc := make(chan os.Signal, 1)
@@ -143,7 +145,7 @@ func StartLogging(c *cli.Context) {
 				os.Exit(0)
 			}
 			if err != nil {
-				panic(err)
+				log.Fatalf("%v", err)
 			}
 			rch <- msg
 			//log.Printf("wrote %d", len(msg))
@@ -161,7 +163,7 @@ var format Format
 func LoadFormat(path string) Format {
 	e, err := exists(path)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 
 	if !e {
@@ -171,12 +173,12 @@ func LoadFormat(path string) Format {
 
 	body, err := ioutil.ReadFile(path)
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 
 	f := make(RawFormat)
 	if err := json.Unmarshal(body, &f); err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 
 	r := make(Format)
@@ -184,7 +186,7 @@ func LoadFormat(path string) Format {
 		s := convertLogFormat(v)
 		t, err := template.New(k).Parse(s)
 		if err != nil {
-			panic(err)
+			log.Fatalf("%v", err)
 		}
 		r[k] = t
 	}
@@ -217,6 +219,8 @@ func (m *RawLog) Print(idx int) {
 	}
 
 	w := bytes.NewBuffer([]byte{})
+	t, _ := timeFromStringInUTC((*m)["time"].(string))
+	(*m)["time"] = t.Format(time.RFC3339Nano)
 	f.Execute(w, *m)
 	fmt.Printf("%v\n", w)
 }
@@ -226,7 +230,7 @@ var LogCommands = []cli.Command{
 		Name:  "log",
 		Usage: "Disply logs for an app",
 		Flags: []cli.Flag{
-			cli.StringFlag{Name: "level", Usage: "Filtering with level"},
+			cli.StringFlag{Name: "level", Usage: "Filtering with level. e.g) DEBUG, INFO, ERROR"},
 			cli.IntFlag{Name: "num,n", Value: 100, Usage: "Show specified number of lines"},
 			cli.StringFlag{Name: "user-id", Usage: "Filtering with UserID"},
 			cli.BoolFlag{Name: "tail,t", Usage: "Similar to tail -f"},
