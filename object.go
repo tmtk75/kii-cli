@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/mitchellh/colorstring"
 	"github.com/tmtk75/cli"
@@ -97,21 +98,21 @@ func AttachObjectBody(bucketname, objectId, conttype string, r io.Reader) {
 	fmt.Printf("%v", string(body))
 }
 
-func publishObjectBody(bucketname, objectId string) []byte {
+func publishObjectBody(bucketname, objectId string, d ExpiredDuration) []byte {
 	p := Profile()
 	path := fmt.Sprintf("/apps/%s/buckets/%s/objects/%v/body/publish", p.AppId, bucketname, objectId)
 	headers := p.HttpHeadersWithAuthorization("application/vnd.kii.ObjectBodyPublicationRequest+json")
-	req := map[string]int64{"expiresIn": 60 * 3 /*sec*/}
+	req := map[string]int64{"expiresIn": (int64(d))}
 	j, _ := json.Marshal(req)
 	return HttpPost(path, headers, bytes.NewReader(j)).Bytes()
 }
 
-func PublishObjectBody(bucketname, objectId string) {
-	body := publishObjectBody(bucketname, objectId)
+func PublishObjectBody(bucketname, objectId string, d ExpiredDuration) {
+	body := publishObjectBody(bucketname, objectId, d)
 	fmt.Printf("%v", string(body))
 }
 
-func CreateObjectAndPublishBody(bucketname, conttype string, br io.Reader) {
+func CreateObjectAndPublishBody(bucketname, conttype string, d ExpiredDuration, br io.Reader) {
 	r := strings.NewReader("{}")
 	j := createObject(bucketname, r)
 	objId := j["objectID"].(string)
@@ -121,7 +122,7 @@ func CreateObjectAndPublishBody(bucketname, conttype string, br io.Reader) {
 	json.Unmarshal(r0, &a)
 	logger.Printf("modifiedAt: %v", a["modifiedAt"])
 
-	r1 := publishObjectBody(bucketname, objId)
+	r1 := publishObjectBody(bucketname, objId, d)
 	var res struct {
 		PublicationID string `json:"publicationID"`
 		URL           string `json:"url"`
@@ -203,16 +204,19 @@ var ObjectCommands = []cli.Command{
 		Name:  "body-publish",
 		Usage: "Publish a body of object in application scope",
 		Args:  `<bucket-id> <object-id>`,
+		Flags: publishFlags,
 		Action: func(c *cli.Context) {
 			bid, _ := c.ArgFor("bucket-id")
 			oid, _ := c.ArgFor("object-id")
-			PublishObjectBody(bid, oid)
+			expired := relativeTimeToDuration(c.String("expired-in"))
+			PublishObjectBody(bid, oid, expired)
 		},
 	},
 	{
 		Name:  "publish",
 		Usage: "Publish a body creating a new object into the bucket in application scope",
 		Args:  `<bucket-id> <content-type>`,
+		Flags: publishFlags,
 		Description: `
    Runs object:create, object-body-attach and object:body-publish in order.
    It's expected body is given thru stdin.
@@ -222,11 +226,26 @@ var ObjectCommands = []cli.Command{
 		Action: func(c *cli.Context) {
 			bid, _ := c.ArgFor("bucket-id")
 			ctype, _ := c.ArgFor("content-type")
+			expired := relativeTimeToDuration(c.String("expired-in"))
 			r := goext.OptionalReader(func() io.Reader {
 				log.Fatalf(colorstring.Color("[red]object body must be given thru stdin"))
 				return nil
 			})
-			CreateObjectAndPublishBody(bid, ctype, r)
+			CreateObjectAndPublishBody(bid, ctype, expired, r)
 		},
 	},
+}
+
+type ExpiredDuration int64
+
+var publishFlags = []cli.Flag{
+	cli.StringFlag{Name: "expired-in", Value: "1m", Usage: "Duration in seconds the publication URL has to be available, after that it will expire"},
+}
+
+func relativeTimeToDuration(s string) ExpiredDuration {
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+	return ExpiredDuration(d.Seconds())
 }
