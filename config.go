@@ -204,7 +204,7 @@ func SetupFlags(app *cli.App) {
 		cli.StringFlag{Name: "http-proxy", Usage: "HTTP proxy URL to be used"},
 		cli.BoolFlag{Name: "disable-http-proxy", Usage: "Disable HTTP proxy in your profile"},
 		cli.BoolFlag{Name: "use-utc", Usage: "Format time in UTC"},
-		cli.BoolFlag{Name: "use-profile-name,n", Usage: "Use profile name as config dirname"},
+		cli.BoolFlag{Name: "use-profile-name", Usage: "Use profile name as config dirname"},
 	}
 
 	app.Before = func(c *cli.Context) error {
