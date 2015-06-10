@@ -121,7 +121,7 @@ type DirPath []string
 func (dir DirPath) MetaFilePath(filename string) string {
 	// Fix dir to take care of multi site & same app-id
 	if globalConfig != nil && globalConfig.usePName && globalConfig.profileName != "" {
-		dir = DirPath([]string{"apps", globalConfig.profileName})
+		dir = DirPath(append([]string{globalConfig.profileName}, dir...))
 	}
 
 	homedir, err := homedir.Dir()
