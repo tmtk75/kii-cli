@@ -24,6 +24,8 @@ type GlobalConfig struct {
 	Curl         bool
 	SuppressExit bool
 	UTC          bool
+	usePName     bool
+	profileName  string
 }
 
 const (
@@ -117,6 +119,11 @@ func metaFilePath(dir string, filename string) string {
 type DirPath []string
 
 func (dir DirPath) MetaFilePath(filename string) string {
+	// Fix dir to take care of multi site & same app-id
+	if globalConfig != nil && globalConfig.usePName && globalConfig.profileName != "" {
+		dir = DirPath([]string{"apps", globalConfig.profileName})
+	}
+
 	homedir, err := homedir.Dir()
 	if err != nil {
 		log.Fatalf("%v", err)
@@ -197,6 +204,7 @@ func SetupFlags(app *cli.App) {
 		cli.StringFlag{Name: "http-proxy", Usage: "HTTP proxy URL to be used"},
 		cli.BoolFlag{Name: "disable-http-proxy", Usage: "Disable HTTP proxy in your profile"},
 		cli.BoolFlag{Name: "use-utc", Usage: "Format time in UTC"},
+		cli.BoolFlag{Name: "use-profile-name,n", Usage: "Use profile name as config dirname"},
 	}
 
 	app.Before = func(c *cli.Context) error {
@@ -246,6 +254,8 @@ func SetupFlags(app *cli.App) {
 			Curl:         c.GlobalBool("curl"),
 			SuppressExit: c.GlobalBool("suppress-exit"),
 			UTC:          c.GlobalBool("use-utc"),
+			usePName:     c.GlobalBool("use-profile-name"),
+			profileName:  profile,
 		}
 
 		proxy := c.String("http-proxy")
@@ -261,6 +271,8 @@ func SetupFlags(app *cli.App) {
 			logger.Printf("http_proxy: %v", proxy)
 			os.Setenv("HTTP_PROXY", proxy)
 		}
+
+		logger.Printf("dirname-to-store: %v\n", metaFilePath(globalConfig.AppId, "."))
 
 		return nil
 	}
