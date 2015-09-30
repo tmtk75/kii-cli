@@ -239,7 +239,7 @@ var ObjectCommands = []cli.Command{
 type ExpiredDuration int64
 
 var publishFlags = []cli.Flag{
-	cli.StringFlag{Name: "expired-in", Value: "1m", Usage: "Duration in seconds the publication URL has to be available, after that it will expire"},
+	cli.StringFlag{Name: "expired-in", Value: "1m", Usage: "Duration in seconds the publication URL has to be available, after that it will expire  ex) 85440h = 10years"},
 }
 
 func relativeTimeToDuration(s string) ExpiredDuration {
