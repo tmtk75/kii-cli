@@ -50,7 +50,7 @@ func (self *OAuth2Response) Load() *OAuth2Response {
 	path := adminTokenFilePath()
 	b, _ := exists(path)
 	if !b {
-		print("You've not logged in, first `login`\n")
+		print("You've not logged in, first `auth login`\n")
 		os.Exit(ExitNotLoggedIn)
 	}
 	self.LoadFrom(path)
