@@ -6,5 +6,5 @@ deployment:
   release:
     branch: [master,dev/circleci]
     commands:
-      - make setup
       - make build
+      - make compress
