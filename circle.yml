@@ -4,7 +4,7 @@ machine:
 
 deployment:
   release:
-    branch: master
+    branch: [master,dev/circleci]
     commands:
       - make setup
       - make build
