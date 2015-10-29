@@ -1,0 +1,10 @@
+machine:
+  timezone: 
+    Asia/Tokyo
+
+deployment:
+  release:
+    branch: master
+    commands:
+      - make setup
+      - make build
