@@ -26,6 +26,7 @@ type GlobalConfig struct {
 	UTC          bool
 	usePName     bool
 	profileName  string
+	IniFile      *ini.File
 }
 
 const (
@@ -256,6 +257,7 @@ func SetupFlags(app *cli.App) {
 			UTC:          c.GlobalBool("use-utc"),
 			usePName:     c.GlobalBool("use-profile-name"),
 			profileName:  profile,
+			IniFile:      inifile,
 		}
 
 		proxy := c.String("http-proxy")
@@ -291,4 +293,32 @@ func Flatten(a []cli.Command) []cli.Command {
 		}
 	}
 	return b
+}
+
+func FindIniFile(appId string) ini.Section {
+	for _, s := range *Profile().IniFile {
+		if _, has := s["app_id"]; !has {
+			continue
+		}
+		if s["app_id"] != appId {
+			continue
+		}
+		return s
+	}
+	log.Fatalf("%v is missing in your config\n", appId)
+	return nil // not reached
+}
+
+func FindAppID(name string) string {
+	for k, s := range *Profile().IniFile {
+		if k != name {
+			continue
+		}
+		if v, has := s["app_id"]; has {
+			return v
+		}
+		log.Fatalf("profile was found, but it didn't have app_id for %v\n", name)
+	}
+	log.Fatalf("profile is missing for %v\n", name)
+	return ""
 }

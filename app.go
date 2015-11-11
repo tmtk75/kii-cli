@@ -23,6 +23,14 @@ func SetValueInAppConfig(prop, val string) {
 	fmt.Printf("%s\n", string(body))
 }
 
+func DeleteValueInAppConfig(prop string) {
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/configuration/parameters/%s", p.AppId, prop)
+	headers := p.HttpHeadersWithAuthorization("application/json")
+	body := HttpDelete(path, headers).Bytes()
+	fmt.Printf("%s\n", string(body))
+}
+
 var AppCommands = []cli.Command{
 	{
 		Name:  "config",
@@ -40,6 +48,16 @@ var AppCommands = []cli.Command{
 			prop, _ := c.ArgFor("property")
 			val, _ := c.ArgFor("value")
 			SetValueInAppConfig(prop, val)
+		},
+	},
+	{
+		Name:        "config-delete",
+		Usage:       "Delete a property of config",
+		Args:        "<property>",
+		Description: `   e.g) kii.consumer_key`,
+		Action: func(c *cli.Context) {
+			prop, _ := c.ArgFor("property")
+			DeleteValueInAppConfig(prop)
 		},
 	},
 }
