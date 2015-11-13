@@ -401,14 +401,22 @@ func ConfigureFederatedAuth(pname string) {
 	id, secret := ProvisionSlaveApp(slave)
 	fmt.Printf("Provisioned the master with a slave app, %v\n", slave)
 
+	args := []string{}
+	if p.Verbose {
+		args = append(args, "--verbose")
+	}
+	if p.Curl {
+		args = append(args, "--curl")
+	}
+
 	// beehive-dev-child auth configure-as-slave a9f0f99uibd0jeja6rn8o4mkjg899sjrph9m chn8rrm4hi7n6dal7pt79l1a06ukhvukk50a3bt1dlnscul7ohomg09ikb5493v 5bae5f53
-	err := run("kii-cli", []string{"--profile", pname, "auth", "configure-as-slave", id, secret, p.AppId})
+	err := run("kii-cli", append(args, []string{"--profile", pname, "auth", "federated", "configure-as-slave", id, secret, p.AppId}...))
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
 
 	// beehive-dev-child auth show-signup-url
-	err = run("kii-cli", []string{"--profile", pname, "auth", "show-signup-url"})
+	err = run("kii-cli", append(args, []string{"--profile", pname, "auth", "federated", "show-signup-url"}...))
 	if err != nil {
 		log.Fatalf("%v", err)
 	}

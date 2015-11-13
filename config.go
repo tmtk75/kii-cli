@@ -21,6 +21,7 @@ type GlobalConfig struct {
 	Site         string
 	endpointUrl  string
 	devlogUrl    string
+	Verbose      bool
 	Curl         bool
 	SuppressExit bool
 	UTC          bool
@@ -252,6 +253,7 @@ func SetupFlags(app *cli.App) {
 			Site:         getConf("site", "KII_SITE", "site"),
 			endpointUrl:  getConf("endpoint-url", "KII_ENDPOINT_URL", "endpoint_url"),
 			devlogUrl:    getConf("log-url", "KII_LOG_URL", "log_url"),
+			Verbose:      c.GlobalBool("verbose"),
 			Curl:         c.GlobalBool("curl"),
 			SuppressExit: c.GlobalBool("suppress-exit"),
 			UTC:          c.GlobalBool("use-utc"),
