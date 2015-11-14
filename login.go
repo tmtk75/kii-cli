@@ -127,6 +127,15 @@ func ConfigureAsMaster() {
 	fmt.Println(string(body))
 }
 
+func StepDownMaster() {
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/configuration/parameters/isMasterApp", p.AppId)
+	headers := p.HttpHeadersWithAuthorization("text/plain")
+	r := bytes.NewBuffer([]byte("false"))
+	body := HttpPut(path, headers, r).Bytes()
+	fmt.Println(string(body))
+}
+
 func definedRedirectURI(siteCode string) (string, error) {
 	u := map[string]string{
 		"us":  "https://%s.us.kiiapps.com/api/apps/%s/integration/webauth/callback",
@@ -463,6 +472,13 @@ var FederatedCommands = []cli.Command{
 		Usage: "Congfigure as master",
 		Action: func(c *cli.Context) {
 			ConfigureAsMaster()
+		},
+	},
+	{
+		Name:  "step-down-master",
+		Usage: "Step down master",
+		Action: func(c *cli.Context) {
+			StepDownMaster()
 		},
 	},
 	{
