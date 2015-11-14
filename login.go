@@ -16,6 +16,13 @@ import (
 	"github.com/tmtk75/cli"
 )
 
+const (
+	OPENIDCONNECT        = "openidconnect.simple.discovery_document_url"
+	FEDAUTH_SIGNUP_URI   = "federated-auth.signup-uri"
+	FEDAUTH_SITE_URI     = "federated-auth.site-uri"
+	FEDAUTH_REDIRECT_URI = "federated-auth.redirect-uri"
+)
+
 type OAuth2Request struct {
 	ClientId     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
@@ -136,69 +143,6 @@ func StepDownMaster() {
 	fmt.Println(string(body))
 }
 
-func definedRedirectURI(siteCode string) (string, error) {
-	u := map[string]string{
-		"us":  "https://%s.us.kiiapps.com/api/apps/%s/integration/webauth/callback",
-		"jp":  "https://%s.jp.kiiapps.com/api/apps/%s/integration/webauth/callback",
-		"sg":  "https://%s.sg.kiiapps.com/api/apps/%s/integration/webauth/callback",
-		"cn2": "https://%s.cn2.kiiapps.com/api/apps/%s/integration/webauth/callback",
-		"cn3": "https://%s.cn3.kiiapps.com/api/apps/%s/integration/webauth/callback",
-	}
-	logger.Printf("site-code: %v", siteCode)
-	if _, has := u[siteCode]; !has {
-		return "", fmt.Errorf("Unknown site code: %v", siteCode)
-	}
-	return u[siteCode], nil
-}
-
-func definedSiteURL(siteCode string) (string, error) {
-	u := map[string]string{
-		"us":  "https://%s.us.kiiapps.com/api/",
-		"jp":  "https://%s.jp.kiiapps.com/api/",
-		"sg":  "https://%s.sg.kiiapps.com/api/",
-		"cn2": "https://%s.cn2.kiiapps.com/api/",
-		"cn3": "https://%s.cn3.kiiapps.com/api/",
-	}
-	logger.Printf("site-code: %v", siteCode)
-	if _, has := u[siteCode]; !has {
-		return "", fmt.Errorf("Unknown site code: %v", siteCode)
-	}
-	return u[siteCode], nil
-}
-
-func RedirectURI(appId string) string {
-	s := FindIniFile(appId)
-	if _, has := s["federated-auth.redirect-uri"]; !has {
-		if _, has := s["site"]; !has {
-			log.Fatalf("Found %v, but it doens't have federated-auth.redirect-uri. Please check your config file.\n", appId)
-		}
-		f, err := definedRedirectURI(s["site"])
-		if err != nil {
-			log.Fatalf("Unknown site code: %v of %v", s["site"], appId)
-		}
-		return fmt.Sprintf(f, appId, appId)
-	}
-	u := s["federated-auth.redirect-uri"]
-	return fmt.Sprintf(u, appId, appId)
-}
-
-func FederatedAuthSiteURI(appId string) string {
-	s := FindIniFile(appId)
-	if _, has := s["federated-auth.site-uri"]; !has {
-		if _, has := s["site"]; !has {
-			log.Fatalf("Found %v, but it doens't have federated-auth.site-uri. Please check your config file.\n", appId)
-		}
-		f, err := definedSiteURL(s["site"])
-		if err != nil {
-			log.Fatalf("Unknown site code: %v of %v", s["site"], appId)
-		}
-		return fmt.Sprintf(f, appId)
-
-	}
-	u := s["federated-auth.site-uri"]
-	return fmt.Sprintf(u, appId)
-}
-
 // https://wiki.kii.com/display/Products/Federated+authentication
 func ProvisionSlaveApp(appId string) (id, secret string) {
 	p := Profile()
@@ -262,41 +206,6 @@ func ConfigureSlaveApp(key, secret, masterAppId string) {
 	body := HttpPost(path, headers, bytes.NewReader(j)).Bytes()
 	fmt.Printf("%v\n", string(body))
 }
-
-func definedDiscoveryDocumentURL(siteCode string) (string, error) {
-	u := map[string]string{
-		"us":  "https://api.kii.com/api/apps/%s/.well-known/openid-configuration",
-		"jp":  "https://api-jp.kii.com/api/apps/%s/.well-known/openid-configuration",
-		"sg":  "https://api-sg.kii.com/api/apps/%s/.well-known/openid-configuration",
-		"cn2": "https://api-cn2.kii.com/api/apps/%s/.well-known/openid-configuration",
-		"cn3": "https://api-cn3.kii.com/api/apps/%s/.well-known/openid-configuration",
-	}
-	logger.Printf("site-code: %v", siteCode)
-	if _, has := u[siteCode]; !has {
-		return "", fmt.Errorf("Unknown site code: %v", siteCode)
-	}
-	return u[siteCode], nil
-}
-
-func DiscoveryDocumentURL(appId string) string {
-	s := FindIniFile(appId)
-	if _, has := s["openidconnect.simple.discovery_document_url"]; !has {
-		if _, has := s["site"]; !has {
-			log.Fatalf("Found %v, but it doens't have openidconnect.simple.discovery_document_url. Please check your config file.\n", appId)
-		}
-		f, err := definedDiscoveryDocumentURL(s["site"])
-		if err != nil {
-			log.Fatalf("Unknown site code: %v of %v", s["site"], appId)
-		}
-		logger.Printf("Found defined signup URI for %v, %v", appId, f)
-		return fmt.Sprintf(f, appId)
-
-	}
-	logger.Printf("Found federated-auth.signup-uri for %v, %v", appId, s["openidconnect.simple.discovery_document_url"])
-	u := s["openidconnect.simple.discovery_document_url"]
-	return fmt.Sprintf(u, appId)
-}
-
 func ConfigureOpenIDConnect(key, secret, slaveAppID string) {
 	p := Profile()
 	if !IsMaster() {
@@ -325,40 +234,6 @@ func ConfigureOpenIDConnect(key, secret, slaveAppID string) {
 	//logger.Printf("%v", string(j))
 	body := HttpPatch(path, headers, bytes.NewReader(j)).Bytes()
 	fmt.Printf("%v\n", string(body))
-}
-
-func definedSignUpURL(siteCode string) (string, error) {
-	u := map[string]string{
-		"us":  "https://%s.us.kiiapps.com/api/apps/%s/integration/webauth/connect?id=kii",
-		"jp":  "https://%s.jp.kiiapps.com/api/apps/%s/integration/webauth/connect?id=kii",
-		"sg":  "https://%s.sg.kiiapps.com/api/apps/%s/integration/webauth/connect?id=kii",
-		"cn2": "https://%s.cn2.kiiapps.com/api/apps/%s/integration/webauth/connect?id=kii",
-		"cn3": "https://%s.cn3.kiiapps.com/api/apps/%s/integration/webauth/connect?id=kii",
-	}
-	logger.Printf("site-code: %v", siteCode)
-	if _, has := u[siteCode]; !has {
-		return "", fmt.Errorf("Unknown site code: %v", siteCode)
-	}
-	return u[siteCode], nil
-}
-
-func FederatedAuthSignUpURI(appId string) string {
-	s := FindIniFile(appId)
-	if _, has := s["federated-auth.signup-uri"]; !has {
-		if _, has := s["site"]; !has {
-			log.Fatalf("Found %v, but it doens't have federated-auth.signup-uri. Please check your config file.\n", appId)
-		}
-		f, err := definedSignUpURL(s["site"])
-		if err != nil {
-			log.Fatalf("Unknown site code: %v of %v", s["site"], appId)
-		}
-		logger.Printf("Found defined signup URI for %v, %v", appId, f)
-		return fmt.Sprintf(f, appId, appId)
-
-	}
-	logger.Printf("Found federated-auth.signup-uri for %v, %v", appId, s["federated-auth.signup-uri"])
-	u := s["federated-auth.signup-uri"]
-	return fmt.Sprintf(u, appId, appId)
 }
 
 func BuildSignUpURL() string {
@@ -429,6 +304,106 @@ func ConfigureFederatedAuth(pname string) {
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
+}
+
+func run(s string, args []string) error {
+	wd, _ := os.Getwd()
+	logger.Printf("[debug] %v %v in %v\n", s, args, wd)
+	//cmd := exec.Command(path.Join(wd, s), args...)
+	cmd := exec.Command(s, args...)
+	cmd.Dir = wd
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		log.Fatalf("%v\n", err)
+	}
+	return err
+}
+
+func kiiapps(siteCode, path string) (string, error) {
+	u := map[string]string{
+		"us":  "https://%s.us.kiiapps.com",
+		"jp":  "https://%s.jp.kiiapps.com",
+		"sg":  "https://%s.sg.kiiapps.com",
+		"cn2": "https://%s.cn2.kiiapps.com",
+		"cn3": "https://%s.cn3.kiiapps.com",
+	}
+	logger.Printf("site-code: %v", siteCode)
+	if _, has := u[siteCode]; !has {
+		return "", fmt.Errorf("Unknown site code: %v", siteCode)
+	}
+	return u[siteCode] + path, nil
+}
+
+func kiiapi(siteCode, path string) (string, error) {
+	u := map[string]string{
+		"us":  "https://api.kii.com/api",
+		"jp":  "https://api-jp.kii.com",
+		"sg":  "https://api-sg.kii.com",
+		"cn2": "https://api-cn2.kii.com",
+		"cn3": "https://api-cn3.kii.com",
+	}
+	logger.Printf("site-code: %v", siteCode)
+	if _, has := u[siteCode]; !has {
+		return "", fmt.Errorf("Unknown site code: %v", siteCode)
+	}
+	return u[siteCode] + path, nil
+}
+
+func definedRedirectURI(siteCode string) (string, error) {
+	return kiiapps(siteCode, "/api/apps/%s/integration/webauth/callback")
+}
+
+func definedSiteURL(siteCode string) (string, error) {
+	return kiiapps(siteCode, "/api")
+}
+
+func definedSignUpURL(siteCode string) (string, error) {
+	return kiiapps(siteCode, "/api/apps/%s/integration/webauth/connect?id=kii")
+}
+
+func definedDiscoveryDocumentURL(siteCode string) (string, error) {
+	return kiiapi(siteCode, "/apps/%s/.well-known/openid-configuration")
+}
+
+func RedirectURI(appId string) string {
+	return findValueOf(FEDAUTH_REDIRECT_URI, appId, definedRedirectURI, 2)
+}
+
+func FederatedAuthSiteURI(appId string) string {
+	return findValueOf(FEDAUTH_SITE_URI, appId, definedSiteURL, 1)
+}
+
+func DiscoveryDocumentURL(appId string) string {
+	return findValueOf(OPENIDCONNECT, appId, definedDiscoveryDocumentURL, 1)
+}
+
+func FederatedAuthSignUpURI(appId string) string {
+	return findValueOf(FEDAUTH_SIGNUP_URI, appId, definedSignUpURL, 2)
+}
+
+func findValueOf(key, appId string, defined func(string) (string, error), numargs int) string {
+	args := make([]interface{}, numargs)
+	for i := 0; i < numargs; i++ {
+		args[i] = appId
+	}
+	s := FindIniFile(appId)
+	if _, has := s[key]; !has {
+		if _, has := s["site"]; !has {
+			log.Fatalf("Found %v, but it doens't have %s. Please check your config file.\n", appId, key)
+		}
+		f, err := defined(s["site"])
+		if err != nil {
+			log.Fatalf("Unknown site code: %v of %v", s["site"], appId)
+		}
+		logger.Printf("Found %s for %v, %v", key, appId, f)
+		return fmt.Sprintf(f, args...)
+
+	}
+	logger.Printf("Found %s for %v, %v", key, appId, s[key])
+	u := s[key]
+	return fmt.Sprintf(u, args...)
 }
 
 var LoginCommands = []cli.Command{
@@ -550,19 +525,4 @@ var FederatedCommands = []cli.Command{
 			ConfigureFederatedAuth(pname)
 		},
 	},
-}
-
-func run(s string, args []string) error {
-	wd, _ := os.Getwd()
-	logger.Printf("[debug] %v %v in %v\n", s, args, wd)
-	//cmd := exec.Command(path.Join(wd, s), args...)
-	cmd := exec.Command(s, args...)
-	cmd.Dir = wd
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	if err != nil {
-		log.Fatalf("%v\n", err)
-	}
-	return err
 }
