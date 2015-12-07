@@ -40,6 +40,11 @@ func main() {
 			Subcommands: kiicli.BucketCommands,
 		},
 		cli.Command{
+			Name:        "group",
+			Usage:       "Group management",
+			Subcommands: kiicli.GroupCommands,
+		},
+		cli.Command{
 			Name:        "object",
 			Usage:       "Object management",
 			Subcommands: kiicli.ObjectCommands,
