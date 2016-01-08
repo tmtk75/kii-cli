@@ -1,0 +1,26 @@
+hash: 4ea2627ed362df9ea12f6697b2193539c727459dff9c9a6b1896bd5f706ad7c5
+updated: 2016-03-12T22:38:47.043169797+09:00
+imports:
+- name: github.com/golang/net
+  version: e7da8edaa52631091740908acaf2c2d4c9b3ce90
+  subpackages:
+  - websocket
+- name: github.com/mitchellh/colorstring
+  version: 8631ce90f28644f54aeedcb3e389a85174e067d1
+- name: github.com/mitchellh/go-homedir
+  version: 981ab348d865cf048eb7d17e78ac7192632d8415
+- name: github.com/tmtk75/cli
+  version: ec3703a9dc1c48a880308ddc644a0f98aa6c4032
+- name: github.com/tmtk75/go-ext
+  version: 21187d7638bfd3e072bbb6437c4f77db05b5f020
+- name: github.com/vaughan0/go-ini
+  version: a98ad7ee00ec53921f08832bc06ecf7fd600e6a1
+- name: golang.org/x/crypto
+  version: de93d05161db39bcbd84d3da2e54c4a18f37f0b1
+  subpackages:
+  - ssh/terminal
+- name: golang.org/x/net
+  version: e7da8edaa52631091740908acaf2c2d4c9b3ce90
+  subpackages:
+  - websocket
+devImports: []

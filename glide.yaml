@@ -1,0 +1,10 @@
+package: github.com/tmtk75/kii-cli
+import:
+- package: github.com/golang/net
+  subpackages:
+  - /websocket
+- package: github.com/mitchellh/colorstring
+- package: github.com/mitchellh/go-homedir
+- package: github.com/tmtk75/cli
+- package: github.com/tmtk75/go-ext
+- package: github.com/vaughan0/go-ini

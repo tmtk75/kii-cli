@@ -19,27 +19,23 @@ hash:
 compress: pkg/kii-cli_win_amd64.zip pkg/kii-cli_darwin_amd64.gz pkg/kii-cli_linux_amd64.gz
 
 pkg/kii-cli_win_amd64.zip pkg/kii-cli_darwin_amd64.gz pkg/kii-cli_linux_amd64.gz:
-	gzip -k pkg/*_386
-	gzip -k pkg/*_amd64
+	gzip pkg/*darwin* pkg/*linux*
 	for e in 386 amd64; do \
-		mv pkg/kii-cli_windows_$$e.exe pkg/kii-cli_$$e.exe; \
-		zip kii-cli_win_$$e.zip pkg/kii-cli_$$e.exe; \
-		mv kii-cli_win_$$e.zip pkg; \
+	  mv pkg/kii-cli_windows_$$e kii-cli_windows_$$e.exe; \
+	  zip kii-cli_windows_$$e.zip kii-cli_windows_$$e.exe; \
 	done
+	mv kii-cli_windows_* pkg
 
 build: clean
-	gox \
-	  -os="$(XC_OS)" \
-	  -arch="$(XC_ARCH)" \
-	  -output "pkg/{{.Dir}}_{{.OS}}_{{.Arch}}" \
-	  ./cmd/kii-cli
+	for arch in $(XC_ARCH); do \
+	  for os in $(XC_OS); do \
+	    echo $$arch $$os; \
+	    GOARCH=$$arch GOOS=$$os go build -o pkg/kii-cli_$${os}_$$arch ./cmd/kii-cli; \
+	  done; \
+	done
 
 clean:
 	rm -f pkg/*.gz pkg/*.zip
 
 distclean:
 	rm -rf kii-cli pkg
-
-setup:
-	go get -u github.com/mitchellh/gox
-	gox -build-toolchain
