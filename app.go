@@ -2,8 +2,9 @@ package kiicli
 
 import (
 	"fmt"
-	"github.com/tmtk75/cli"
 	"strings"
+
+	"github.com/tmtk75/cli"
 )
 
 func PrintAppInfo() {
@@ -22,6 +23,14 @@ func SetAppParam(name string, value string) {
 	fmt.Printf("%s\n", string(body))
 }
 
+func DeleteAppParam(prop string) {
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/configuration/parameters/%s", p.AppId, prop)
+	headers := p.HttpHeadersWithAuthorization("application/json")
+	body := HttpDelete(path, headers).Bytes()
+	fmt.Printf("%s\n", string(body))
+}
+
 var AppCommands = []cli.Command{
 	{
 		Name:  "config",
@@ -32,12 +41,21 @@ var AppCommands = []cli.Command{
 	},
 	{
 		Name:  "set-param",
-		Usage: "set an app param",
+		Usage: "Set an app param",
 		Args:  "<paramname> <paramvalue>",
 		Action: func(c *cli.Context) {
 			name, _ := c.ArgFor("paramname")
 			value, _ := c.ArgFor("paramvalue")
 			SetAppParam(name, value)
+		},
+	},
+	{
+		Name:  "delete-param",
+		Usage: "Delete an app param",
+		Args:  "<paramname>",
+		Action: func(c *cli.Context) {
+			name, _ := c.ArgFor("paramname")
+			DeleteAppParam(name)
 		},
 	},
 }

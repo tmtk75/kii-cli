@@ -69,6 +69,22 @@ func DeleteUser(userId string) {
 	fmt.Println(string(b))
 }
 
+func ListUserBuckets(userId string) {
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/users/%v/buckets", p.AppId, userId)
+	headers := p.HttpHeadersWithAuthorization("")
+	b := HttpGet(path, headers).Bytes()
+	fmt.Println(string(b))
+}
+
+func DeleteUserBucket(userId, bucketId string) {
+	p := Profile()
+	path := fmt.Sprintf("/apps/%s/users/%v/buckets/%v", p.AppId, userId, bucketId)
+	headers := p.HttpHeadersWithAuthorization("")
+	b := HttpDelete(path, headers).Bytes()
+	fmt.Println(string(b))
+}
+
 var UserCommands = []cli.Command{
 	{
 		Name:  "create",
@@ -113,6 +129,25 @@ var UserCommands = []cli.Command{
 			name, _ := c.ArgFor("loginname")
 			pass, _ := c.ArgFor("password")
 			LoginAsUser(name, pass)
+		},
+	},
+	{
+		Name:  "list-buckets",
+		Usage: "List buckets",
+		Args:  `<user-id>`,
+		Action: func(c *cli.Context) {
+			uid, _ := c.ArgFor("user-id")
+			ListUserBuckets(uid)
+		},
+	},
+	{
+		Name:  "delete-bucket",
+		Usage: "Delete a user bucket",
+		Args:  `<user-id> <bucket-id>`,
+		Action: func(c *cli.Context) {
+			uid, _ := c.ArgFor("user-id")
+			bid, _ := c.ArgFor("bucket-id")
+			DeleteUserBucket(uid, bid)
 		},
 	},
 }

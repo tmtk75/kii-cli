@@ -21,9 +21,13 @@ type GlobalConfig struct {
 	Site         string
 	endpointUrl  string
 	devlogUrl    string
+	Verbose      bool
 	Curl         bool
 	SuppressExit bool
 	UTC          bool
+	usePName     bool
+	profileName  string
+	IniFile      *ini.File
 }
 
 const (
@@ -117,6 +121,11 @@ func metaFilePath(dir string, filename string) string {
 type DirPath []string
 
 func (dir DirPath) MetaFilePath(filename string) string {
+	// Fix dir to take care of multi site & same app-id
+	if globalConfig != nil && globalConfig.usePName && globalConfig.profileName != "" {
+		dir = DirPath(append([]string{globalConfig.profileName}, dir...))
+	}
+
 	homedir, err := homedir.Dir()
 	if err != nil {
 		log.Fatalf("%v", err)
@@ -197,6 +206,7 @@ func SetupFlags(app *cli.App) {
 		cli.StringFlag{Name: "http-proxy", Usage: "HTTP proxy URL to be used"},
 		cli.BoolFlag{Name: "disable-http-proxy", Usage: "Disable HTTP proxy in your profile"},
 		cli.BoolFlag{Name: "use-utc", Usage: "Format time in UTC"},
+		cli.BoolFlag{Name: "use-profile-name", Usage: "Use profile name as config dirname"},
 	}
 
 	app.Before = func(c *cli.Context) error {
@@ -243,9 +253,13 @@ func SetupFlags(app *cli.App) {
 			Site:         getConf("site", "KII_SITE", "site"),
 			endpointUrl:  getConf("endpoint-url", "KII_ENDPOINT_URL", "endpoint_url"),
 			devlogUrl:    getConf("log-url", "KII_LOG_URL", "log_url"),
+			Verbose:      c.GlobalBool("verbose"),
 			Curl:         c.GlobalBool("curl"),
 			SuppressExit: c.GlobalBool("suppress-exit"),
 			UTC:          c.GlobalBool("use-utc"),
+			usePName:     c.GlobalBool("use-profile-name"),
+			profileName:  profile,
+			IniFile:      inifile,
 		}
 
 		proxy := c.String("http-proxy")
@@ -261,6 +275,8 @@ func SetupFlags(app *cli.App) {
 			logger.Printf("http_proxy: %v", proxy)
 			os.Setenv("HTTP_PROXY", proxy)
 		}
+
+		logger.Printf("dirname-to-store: %v\n", metaFilePath(globalConfig.AppId, "."))
 
 		return nil
 	}
@@ -279,4 +295,32 @@ func Flatten(a []cli.Command) []cli.Command {
 		}
 	}
 	return b
+}
+
+func FindIniFile(appId string) ini.Section {
+	for _, s := range *Profile().IniFile {
+		if _, has := s["app_id"]; !has {
+			continue
+		}
+		if s["app_id"] != appId {
+			continue
+		}
+		return s
+	}
+	log.Fatalf("%v is missing in your config\n", appId)
+	return nil // not reached
+}
+
+func FindAppID(name string) string {
+	for k, s := range *Profile().IniFile {
+		if k != name {
+			continue
+		}
+		if v, has := s["app_id"]; has {
+			return v
+		}
+		log.Fatalf("profile was found, but it didn't have app_id for %v\n", name)
+	}
+	log.Fatalf("profile is missing for %v\n", name)
+	return ""
 }

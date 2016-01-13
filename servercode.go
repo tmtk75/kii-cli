@@ -316,7 +316,6 @@ var ServerCodeCommands = []cli.Command{
         "kiicloud://scheduler" : {
           "HourlyMessage" : {
             "what" : "EXECUTE_SERVER_CODE",
-            "name" : "HourlyMessage",
             "cron" : "15 * * * *",
             "endpoint" : "main",
             "parameters" : {"message" : "Hello"}

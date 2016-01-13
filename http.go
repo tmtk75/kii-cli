@@ -36,6 +36,10 @@ func HttpPut(path string, headers Headers, r io.Reader) *HttpResponse {
 	return httpRequest("PUT", path, headers, r)
 }
 
+func HttpPatch(path string, headers Headers, r io.Reader) *HttpResponse {
+	return httpRequest("PATCH", path, headers, r)
+}
+
 func HttpDelete(path string, headers Headers) *HttpResponse {
 	empty := []byte{}
 	return httpRequest("DELETE", path, headers, bytes.NewReader(empty))
