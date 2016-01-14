@@ -42,10 +42,11 @@ func (self *GlobalConfig) EndpointUrl() string {
 		return self.endpointUrl
 	}
 	hosts := map[string]string{
-		"us": "api.kii.com",
-		"jp": "api-jp.kii.com",
-		"cn": "api-cn2.kii.com",
-		"sg": "api-sg.kii.com",
+		"us":  "api.kii.com",
+		"jp":  "api-jp.kii.com",
+		"cn":  "api-cn2.kii.com",
+		"sg":  "api-sg.kii.com",
+		"cn3": "api-cn3.kii.com",
 	}
 	p := Profile()
 	host := hosts[p.Site]
@@ -61,10 +62,11 @@ func (self *GlobalConfig) EndpointUrlForApiLog() string {
 		return self.devlogUrl
 	}
 	hosts := map[string]string{
-		"us": "apilog.kii.com",
-		"jp": "apilog-jp.kii.com",
-		"cn": "apilog-cn2.kii.com",
-		"sg": "apilog-sg.kii.com",
+		"us":  "apilog.kii.com",
+		"jp":  "apilog-jp.kii.com",
+		"cn":  "apilog-cn2.kii.com",
+		"sg":  "apilog-sg.kii.com",
+		"cn3": "apilog-cn3.kii.com",
 	}
 	p := Profile()
 	host := hosts[p.Site]
