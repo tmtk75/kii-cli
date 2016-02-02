@@ -7,7 +7,7 @@ import (
 
 	"github.com/tmtk75/cli"
 
-	"code.google.com/p/go.net/websocket"
+	"golang.org/x/net/websocket"
 )
 
 func echoHandler(ws *websocket.Conn) {

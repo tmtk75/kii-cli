@@ -17,7 +17,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/tmtk75/cli"
 
-	"code.google.com/p/go.net/websocket"
+	"golang.org/x/net/websocket"
 )
 
 type RawLog map[string]interface{}
