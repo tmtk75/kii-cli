@@ -107,6 +107,16 @@ func StartLogging(c *cli.Context) {
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
+
+	wddur := c.Int("write-deadline-duration")
+	rddur := c.Int("read-deadline-duration")
+	logger.Printf("write-deadline-duration: %v", wddur)
+	logger.Printf("read-deadline-duration: %v", rddur)
+
+	now := time.Now()
+	ws.SetWriteDeadline(now.Add(time.Duration(wddur) * time.Millisecond))
+	logger.Printf("SetWriteDeadline with %v", rddur)
+
 	_, err = ws.Write(j)
 	if err != nil {
 		log.Fatalf("%v", err)
@@ -140,6 +150,9 @@ func StartLogging(c *cli.Context) {
 		select {
 		default:
 			var msg []RawLog
+			now := time.Now()
+			ws.SetReadDeadline(now.Add(time.Duration(rddur) * time.Millisecond))
+			logger.Printf("SetReadDeadline with %v", rddur)
 			err = websocket.JSON.Receive(ws, &msg)
 			if err == io.EOF {
 				os.Exit(0)
@@ -241,6 +254,8 @@ var LogCommands = []cli.Command{
 			},
 			cli.StringFlag{Name: "date-from", Usage: "Filtering from specified date"},
 			cli.StringFlag{Name: "date-to", Usage: "Filtering until specified date"},
+			cli.IntFlag{Name: "write-deadline-duration", Value: 30 * 1000, Usage: "Duration until write in millisecond. If exceed, i/o timeout happens"},
+			cli.IntFlag{Name: "read-deadline-duration", Value: 120 * 1000, Usage: "Duration until read in millisecond. If exceed, i/o timeout happends"},
 		},
 		Action: func(c *cli.Context) {
 			format = LoadFormat(c.String("format-file"))

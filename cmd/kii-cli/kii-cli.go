@@ -11,7 +11,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "kii-cli"
 	app.Usage = "KiiCloud command line interface"
-	app.Version = "0.1.7"
+	app.Version = "0.1.9"
 	app.Commands = []cli.Command{
 		cli.Command{
 			Name:        "auth",
@@ -38,6 +38,11 @@ func main() {
 			Name:        "bucket",
 			Usage:       "Bucket management",
 			Subcommands: kiicli.BucketCommands,
+		},
+		cli.Command{
+			Name:        "group",
+			Usage:       "Group management",
+			Subcommands: kiicli.GroupCommands,
 		},
 		cli.Command{
 			Name:        "object",
