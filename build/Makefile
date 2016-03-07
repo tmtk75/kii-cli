@@ -43,7 +43,7 @@ build:
 	rpm -qpil $(RPM_DEST_DIR)$(RPM_NAME)-$(RPM_VERSION)-1.$(ARC).rpm
 
 copy2repo:
-	scp $(RPM_DEST_DIR)$(RPM_NAME)-$(RPM_VERSION)-1.$(ARC).rpm static.kii.com:/tmp/
+	scp $(RPM_DEST_DIR)$(RPM_NAME)-$(RPM_VERSION)-1.$(ARC).rpm $(TARGET_HOSTNAME):/tmp/
 	@echo -e "please copy from /tmp/$(RPM_NAME)-$(RPM_VERSION)-1.$(ARC).rpm to /mnt/ebs/rpm-repo/external/x86_64/"
 
 clean:
