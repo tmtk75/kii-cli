@@ -15,12 +15,22 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/pkg/errors"
 	"github.com/tmtk75/cli"
 
 	"golang.org/x/net/websocket"
 )
 
 type RawLog map[string]interface{}
+
+type RawLog2 []RawLog
+
+func (r *RawLog2) UnmarshalJSON(b []byte) error {
+	var a []RawLog
+	err := json.Unmarshal(b, &a)
+	*r = a
+	return errors.Wrapf(err, string(b))
+}
 
 func (self *RawLog) Log() *Log {
 	f := time.RFC3339Nano // "2006-01-02T15:04:05.999Z"
@@ -130,7 +140,7 @@ func StartLogging(c *cli.Context) {
 		os.Exit(0)
 	}()
 
-	rch := make(chan []RawLog)
+	rch := make(chan RawLog2)
 
 	go func() {
 		for {
@@ -149,7 +159,7 @@ func StartLogging(c *cli.Context) {
 	for {
 		select {
 		default:
-			var msg []RawLog
+			var msg RawLog2
 			now := time.Now()
 			ws.SetReadDeadline(now.Add(time.Duration(rddur) * time.Millisecond))
 			logger.Printf("SetReadDeadline with %v", rddur)
