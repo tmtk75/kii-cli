@@ -1,0 +1,35 @@
+#
+# How to build with goreleaser
+#
+#   $ brew install goreleaser
+#   $ goreleaser build --rm-dist
+#
+#
+project_name: kii-cli
+env:
+  - GO111MODULE=on
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - main: ./cmd/kii-cli
+    binary: kii-cli
+    ldflags:
+      - -s -w
+      - -X main.Version={{ replace .Version "-kii-cli" "" }}
+      - -X main.Commit={{ .ShortCommit }}
+      - -X main.Date={{ .Date }}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64  # for https://github.com/KiiCorp/team-server-jp/issues/12973
+archives:
+  - name_template: '{{ .ProjectName }}_{{ replace .Version "-kii-cli" "" }}_{{ .Os }}_{{ .Arch }}'
+checksum:
+  name_template: '{{ .ProjectName }}_{{ replace .Version "-kii-cli" "" }}_checksums.txt'
+release:
+  prerelease: auto
